@@ -1,0 +1,60 @@
+
+\usepackage[svgnames]{xcolor} % Required for colour specification
+
+
+\usepackage[utf8]{inputenc} % Required for inputting international characters
+\usepackage[T1]{fontenc} % Output font encoding for international characters
+\usepackage{PTSerif} % Use the Paratype Serif font
+
+\usepackage[utf8]{inputenc}
+
+%% Language and font encodings
+\usepackage[spanish]{babel}       %%%% Si no compila cambiar a english
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{blindtext}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{commath}
+
+
+\addto\captionsenglish{%
+  \renewcommand{\figurename}{Figura}%
+  \renewcommand{\tablename}{Tabla}%
+}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\usepackage{amsmath}
+
+\usepackage{colortbl}
+
+\usepackage{colortbl}
+\definecolor{fuchsia}{rgb}{1.0, 0.0, 1.0}
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0}
+
+
+%Paquetes agragados por personalizacion}
+
+\definecolor{My}{RGB}{200,0,0}% Cambiar color de letras
+%Referencias
+\usepackage[backend=biber,style=ieee]{biblatex}
+\usepackage{ulem} % Paquete para más opciones de subrayado
+\addbibresource{referencias.bib}
+
+
+\usepackage{circuitikz}
+
+%\newcommand*{\plogo}{\fbox{$\mathcal{PL}$}} % Generic dummy publisher logo
+
+\newcommand*{\plogo}{\includegraphics[width=45pt]{Pictures/images.png}} 
