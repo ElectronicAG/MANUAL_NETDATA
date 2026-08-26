@@ -8,6 +8,8 @@
 !Pictures/
 !Pictures/**
 
-# Permitir archivos .tex en la raíz y subcarpetas
+# Permitir archivos .tex y .bib en la raíz y subcarpetas
 !*.tex
 !**/*.tex
+!*.bib
+!**/*.bib
