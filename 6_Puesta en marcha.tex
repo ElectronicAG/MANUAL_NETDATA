@@ -1,0 +1,95 @@
+Para comprobar la puesta en marcha de Netdata en la Raspberry Pi se deben
+ejecutar las siguientes pruebas desde una terminal. Cada prueba incluye el
+resultado esperado que permite considerarla satisfactoria.
+
+\section{Pruebas de puesta en marcha}
+
+\subsection{Estado del servicio}
+
+Comprobar que el servicio está habilitado y en ejecución:
+
+\begin{lstlisting}[style=terminal]
+sudo systemctl is-enabled netdata
+sudo systemctl is-active netdata
+sudo systemctl status netdata --no-pager
+\end{lstlisting}
+
+\textbf{Resultado esperado:} los dos primeros comandos muestran
+\texttt{enabled} y \texttt{active}; el estado del servicio indica
+\texttt{Active: active (running)}.
+
+\subsection{Escucha del puerto de Netdata}
+
+Verificar que Netdata escucha en el puerto TCP 19999:
+
+\begin{lstlisting}[style=terminal]
+sudo ss -lntp | grep ':19999'
+\end{lstlisting}
+
+\textbf{Resultado esperado:} aparece una línea en estado \texttt{LISTEN}
+asociada al puerto \texttt{19999}.
+
+\subsection{Respuesta de la interfaz web}
+
+Consultar la interfaz desde la propia Raspberry Pi:
+
+\begin{lstlisting}[style=terminal]
+curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:19999/
+\end{lstlisting}
+
+\textbf{Resultado esperado:} el código HTTP obtenido es \texttt{200}.
+
+\subsection{Respuesta de la API}
+
+Comprobar que la API entrega información del agente:
+
+\begin{lstlisting}[style=terminal]
+curl -fsS http://127.0.0.1:19999/api/v1/info | head
+\end{lstlisting}
+
+\textbf{Resultado esperado:} se recibe una respuesta JSON con información de
+Netdata y del nodo, sin errores de conexión.
+
+\subsection{Recolección de métricas}
+
+Solicitar muestras recientes de uso de CPU mediante la API:
+
+\begin{lstlisting}[style=terminal]
+curl -fsS 'http://127.0.0.1:19999/api/v1/data?chart=system.cpu&after=-60&points=5'
+\end{lstlisting}
+
+\textbf{Resultado esperado:} se recibe una respuesta JSON con marcas de tiempo
+y valores numéricos de CPU. Esto confirma que el agente no solo responde, sino
+que también recolecta métricas.
+
+\subsection{Registro de errores del servicio}
+
+Revisar mensajes recientes del servicio durante el arranque:
+
+\begin{lstlisting}[style=terminal]
+sudo journalctl -u netdata -b --priority=err --no-pager
+\end{lstlisting}
+
+\textbf{Resultado esperado:} no aparecen errores críticos que impidan la
+recolección o publicación de métricas.
+
+\subsection{Arranque automático}
+
+Reiniciar únicamente el servicio y repetir las comprobaciones básicas:
+
+\begin{lstlisting}[style=terminal]
+sudo systemctl restart netdata
+sudo systemctl is-active netdata
+curl -sS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:19999/
+\end{lstlisting}
+
+\textbf{Resultado esperado:} el servicio vuelve a estado \texttt{active} y la
+interfaz responde con código HTTP \texttt{200}. Para validar el arranque tras
+un reinicio completo de la Raspberry Pi, reiniciar el equipo y repetir estas
+dos últimas comprobaciones.
+
+\section{Criterio de aceptación}
+
+La puesta en marcha se considera satisfactoria cuando el servicio queda
+habilitado y activo, escucha en el puerto 19999, responde por HTTP y por la API,
+entrega métricas recientes y no registra errores críticos de operación.
