@@ -1,15 +1,19 @@
 # Ignorar todo por defecto
-*
+# *
 
 # No ignorar este archivo de configuración
 !.gitignore
 
-# Permitir la carpeta Pictures y su contenido
-!Pictures/
-!Pictures/**
-
-# Permitir archivos .tex y .bib en la raíz y subcarpetas
-!*.tex
-!**/*.tex
-!*.bib
-!**/*.bib
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.tar.gz
+*.zip

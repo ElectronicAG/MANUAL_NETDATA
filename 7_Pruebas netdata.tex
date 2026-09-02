@@ -44,6 +44,8 @@ Después de completar el procedimiento, la Raspberry Pi aparecerá como un nodo 
 del Space. La conexión entre el agente y Netdata Cloud se realiza mediante el
 \textit{Agent-Cloud Link} y utiliza una conexión saliente cifrada por el puerto TCP 443.
 
+\input{Pictures/7/1/7_1.tex}
+
 \section{Gestión de usuarios}
 
 La gestión de usuarios se realiza desde Netdata Cloud y no desde el panel local del
@@ -87,6 +89,8 @@ Los roles disponibles pueden variar según el plan contratado en Netdata Cloud. 
 razón, antes de diseñar la estructura de permisos debe comprobarse qué funciones están
 incluidas en el plan utilizado.
 
+\input{Pictures/7/2/7_2.tex}
+
 \section{Creación de usuarios para los equipos de trabajo}
 
 En Netdata Cloud no es recomendable crear una única cuenta y compartir su contraseña
@@ -126,6 +130,8 @@ Un mismo nodo puede pertenecer a varias Rooms, pero solamente puede estar asocia
 un Space. Esto permite que la Raspberry Pi o cualquier otro servidor sea visible para
 más de un equipo sin tener que instalar nuevamente el agente.
 
+\input{Pictures/7/3/7_3.tex}
+
 \section{Credenciales y contraseñas}
 
 La cuenta principal no crea manualmente las contraseñas de los demás integrantes. El
@@ -156,6 +162,8 @@ Las credenciales personales no deben confundirse con el \textit{claiming token} 
 para conectar un agente con un Space. Este token es una credencial administrativa y
 debe tratarse como información confidencial. No se debe incluir en el manual, en
 capturas de pantalla ni en repositorios de código.
+
+\input{Pictures/7/4/7_4.tex}
 
 \section{Creación de dashboards}
 
@@ -206,6 +214,8 @@ Netdata Cloud también dispone de un modo denominado \textit{TV Mode}, destinado
 mostrar dashboards en pantallas compartidas. La dirección generada por este modo
 contiene un token de acceso, por lo que debe tratarse como una credencial confidencial y
 compartirse únicamente con personal autorizado.
+
+\input{Pictures/7/5/7_5.tex}
 
 \section{Recomendaciones de administración}
 
