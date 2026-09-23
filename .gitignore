@@ -17,3 +17,9 @@
 *.toc
 *.tar.gz
 *.zip
+
+
+__pycache__/
+*.pyc
+.venv/
+
