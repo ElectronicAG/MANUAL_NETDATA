@@ -12,6 +12,8 @@ find . \( \
     -name "*.out" -o \
     -name "*.run.xml" -o \
     -name "*.synctex.gz" -o \
+    -name "*.bbl-SAVE-ERROR" -o \
+    -name "*.bcf-SAVE-ERROR" -o \
     -name "*.toc" \
 \) -type f -print -delete
 
