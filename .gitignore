@@ -19,6 +19,7 @@
 *.zip
 *.bbl-SAVE-ERROR
 *.bcf-SAVE-ERROR
+*.synctex(
 
 
 __pycache__/
