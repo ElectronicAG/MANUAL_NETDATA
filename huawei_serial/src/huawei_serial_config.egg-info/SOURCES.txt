@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+src/code_python/__init__.py
+src/code_python/__main__.py
+src/code_python/serial_config.py
+src/huawei_serial_config.egg-info/PKG-INFO
+src/huawei_serial_config.egg-info/SOURCES.txt
+src/huawei_serial_config.egg-info/dependency_links.txt
+src/huawei_serial_config.egg-info/entry_points.txt
+src/huawei_serial_config.egg-info/requires.txt
+src/huawei_serial_config.egg-info/top_level.txt
+tests/test_serial_config.py

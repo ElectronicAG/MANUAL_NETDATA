@@ -1,0 +1,503 @@
+LAB MPLS - HUAWEI AR651 Y S6730H
+Script completo de configuracion
+
+IMPORTANTE
+==========
+1. Ejecuta cada bloque solamente en el dispositivo indicado.
+2. Los puertos GigabitEthernet de los S6730H se convierten a Layer 3 con
+   "undo portswitch". Si el comando no existe o el puerto ya es Layer 3,
+   omite esa linea.
+3. Verifica el nombre real de las interfaces con "display interface brief".
+4. En algunas versiones de VRP, "ping lsp ip" aparece como "ping lsp ipv4".
+   Comprueba la variante disponible con "ping lsp ?".
+5. Guarda la configuracion con "save" solamente cuando el instructor lo indique.
+
+
+============================================================
+PARTE 1 - CONFIGURACION BASE Y OSPF
+============================================================
+
+-------------------------
+DISPOSITIVO: AR651-A
+-------------------------
+system-view
+sysname AR651-A
+
+interface GigabitEthernet0/0/1
+ ip address 10.0.12.1 255.255.255.252
+ undo shutdown
+ quit
+
+interface LoopBack0
+ ip address 1.1.1.1 255.255.255.255
+ quit
+
+ospf 1
+ area 0.0.0.0
+  network 1.1.1.1 0.0.0.0
+  network 10.0.12.0 0.0.0.3
+  quit
+ quit
+
+return
+
+
+-------------------------
+DISPOSITIVO: S6730H-C
+-------------------------
+system-view
+sysname S6730H-C
+
+interface GigabitEthernet0/0/1
+ undo portswitch
+ ip address 10.0.12.2 255.255.255.252
+ undo shutdown
+ quit
+
+interface GigabitEthernet0/0/2
+ undo portswitch
+ ip address 10.0.23.1 255.255.255.252
+ undo shutdown
+ quit
+
+interface LoopBack0
+ ip address 2.2.2.2 255.255.255.255
+ quit
+
+ospf 1
+ area 0.0.0.0
+  network 2.2.2.2 0.0.0.0
+  network 10.0.12.0 0.0.0.3
+  network 10.0.23.0 0.0.0.3
+  quit
+ quit
+
+return
+
+
+-------------------------
+DISPOSITIVO: S6730H-D
+-------------------------
+system-view
+sysname S6730H-D
+
+interface GigabitEthernet0/0/1
+ undo portswitch
+ ip address 10.0.23.2 255.255.255.252
+ undo shutdown
+ quit
+
+interface GigabitEthernet0/0/2
+ undo portswitch
+ ip address 10.0.34.1 255.255.255.252
+ undo shutdown
+ quit
+
+interface LoopBack0
+ ip address 3.3.3.3 255.255.255.255
+ quit
+
+ospf 1
+ area 0.0.0.0
+  network 3.3.3.3 0.0.0.0
+  network 10.0.23.0 0.0.0.3
+  network 10.0.34.0 0.0.0.3
+  quit
+ quit
+
+return
+
+
+-------------------------
+DISPOSITIVO: AR651-B
+-------------------------
+system-view
+sysname AR651-B
+
+interface GigabitEthernet0/0/1
+ ip address 10.0.34.2 255.255.255.252
+ undo shutdown
+ quit
+
+interface LoopBack0
+ ip address 4.4.4.4 255.255.255.255
+ quit
+
+ospf 1
+ area 0.0.0.0
+  network 4.4.4.4 0.0.0.0
+  network 10.0.34.0 0.0.0.3
+  quit
+ quit
+
+return
+
+
+-------------------------
+VERIFICACION DE OSPF
+-------------------------
+display ospf peer brief
+display ip routing-table protocol ospf
+
+# Ejecutar desde AR651-A:
+ping -a 1.1.1.1 4.4.4.4
+
+# No continuar hasta que el ping funcione y exista una ruta a 4.4.4.4/32.
+
+
+============================================================
+PARTE 2 - HABILITAR MPLS Y CREAR EL LSP ESTATICO
+============================================================
+
+Plan de etiquetas utilizado:
+AR651-A    : out-label 100
+S6730H-C   : in-label 100, out-label 200
+S6730H-D   : in-label 200, out-label 300
+AR651-B    : in-label 300
+
+NOTA SOBRE PHP:
+El documento solicita Implicit NULL/PHP en S6730H-D y, al mismo tiempo, un
+in-label en AR651-B. Esto no coincide con el ejemplo convencional de LSP
+estatico de Huawei: si D hace PHP, B recibe IP sin etiqueta. Por seguridad,
+este script usa un LSP estatico normal 100 -> 200 -> 300. El PHP se observa
+automaticamente en la seccion LDP. No uses out-label 3/implicit-null en el LSP
+estatico a menos que el instructor confirme que la version VRP lo admite.
+
+
+-------------------------
+DISPOSITIVO: AR651-A
+-------------------------
+system-view
+mpls lsr-id 1.1.1.1
+mpls
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls
+ quit
+
+static-lsp ingress LSP-A-B destination 4.4.4.4 32 nexthop 10.0.12.2 out-label 100
+return
+
+
+-------------------------
+DISPOSITIVO: S6730H-C
+-------------------------
+system-view
+mpls lsr-id 2.2.2.2
+mpls
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls
+ quit
+
+interface GigabitEthernet0/0/2
+ mpls
+ quit
+
+static-lsp transit LSP-A-B incoming-interface GigabitEthernet0/0/1 in-label 100 nexthop 10.0.23.2 out-label 200
+return
+
+
+-------------------------
+DISPOSITIVO: S6730H-D
+-------------------------
+system-view
+mpls lsr-id 3.3.3.3
+mpls
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls
+ quit
+
+interface GigabitEthernet0/0/2
+ mpls
+ quit
+
+static-lsp transit LSP-A-B incoming-interface GigabitEthernet0/0/1 in-label 200 nexthop 10.0.34.2 out-label 300
+return
+
+
+-------------------------
+DISPOSITIVO: AR651-B
+-------------------------
+system-view
+mpls lsr-id 4.4.4.4
+mpls
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls
+ quit
+
+static-lsp egress LSP-A-B incoming-interface GigabitEthernet0/0/1 in-label 300
+return
+
+
+-------------------------
+VERIFICACION DEL LSP ESTATICO
+-------------------------
+display mpls interface
+display mpls static-lsp
+display mpls static-lsp verbose
+display mpls lsp
+
+# Ejecutar desde AR651-A. Probar la variante admitida por el equipo:
+ping lsp ip 4.4.4.4 32
+# Alternativa de algunas versiones:
+# ping lsp ipv4 4.4.4.4 32
+
+
+-------------------------
+PRUEBA DE FALLA DEL LSP ESTATICO
+-------------------------
+# Ejecutar en AR651-A:
+system-view
+interface GigabitEthernet0/0/1
+ shutdown
+ quit
+return
+
+# Esperar aproximadamente 30 segundos y comprobar:
+ping lsp ip 4.4.4.4 32
+
+# Restaurar el enlace antes de continuar:
+system-view
+interface GigabitEthernet0/0/1
+ undo shutdown
+ quit
+return
+
+
+============================================================
+PARTE 3 - ELIMINAR EL LSP ESTATICO Y HABILITAR LDP
+============================================================
+
+-------------------------
+ELIMINAR EL LSP ESTATICO
+-------------------------
+
+# AR651-A:
+system-view
+undo static-lsp ingress LSP-A-B
+return
+
+# S6730H-C:
+system-view
+undo static-lsp transit LSP-A-B
+return
+
+# S6730H-D:
+system-view
+undo static-lsp transit LSP-A-B
+return
+
+# AR651-B:
+system-view
+undo static-lsp egress LSP-A-B
+return
+
+# Confirmar que ya no existe:
+display mpls static-lsp
+
+
+-------------------------
+HABILITAR LDP EN AR651-A
+-------------------------
+system-view
+mpls ldp
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls ldp
+ quit
+return
+
+
+-------------------------
+HABILITAR LDP EN S6730H-C
+-------------------------
+system-view
+mpls ldp
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls ldp
+ quit
+
+interface GigabitEthernet0/0/2
+ mpls ldp
+ quit
+return
+
+
+-------------------------
+HABILITAR LDP EN S6730H-D
+-------------------------
+system-view
+mpls ldp
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls ldp
+ quit
+
+interface GigabitEthernet0/0/2
+ mpls ldp
+ quit
+return
+
+
+-------------------------
+HABILITAR LDP EN AR651-B
+-------------------------
+system-view
+mpls ldp
+ quit
+
+interface GigabitEthernet0/0/1
+ mpls ldp
+ quit
+return
+
+
+-------------------------
+VERIFICACION DE LDP
+-------------------------
+display mpls ldp interface
+display mpls ldp peer
+display mpls ldp session
+display mpls ldp session verbose
+display mpls ldp lsp
+display mpls lsp
+
+# Ejecutar desde AR651-A:
+ping lsp ip 4.4.4.4 32
+tracert lsp ip 4.4.4.4 32
+
+# Alternativas de algunas versiones:
+# ping lsp ipv4 4.4.4.4 32
+# tracert lsp ipv4 4.4.4.4 32
+
+# Estado esperado de una sesion LDP completamente establecida:
+# Operational
+
+
+-------------------------
+PRUEBA DE FALLA CON LDP
+-------------------------
+# Ejecutar en AR651-A:
+system-view
+interface GigabitEthernet0/0/1
+ shutdown
+ quit
+return
+
+# Esperar y comprobar:
+ping lsp ip 4.4.4.4 32
+
+# IMPORTANTE: en esta topologia lineal no hay ruta alternativa.
+# LDP solo convergera por otro camino si el instructor agrega un segundo enlace.
+
+# Restaurar el enlace:
+system-view
+interface GigabitEthernet0/0/1
+ undo shutdown
+ quit
+return
+
+
+============================================================
+PARTE 4 - CAMBIO DEL MODO DE ANUNCIO A DoD
+============================================================
+
+# Antes del cambio, verificar en S6730H-C:
+display mpls ldp interface
+display mpls ldp session verbose
+
+# El modo predeterminado es DU (Downstream Unsolicited).
+# La sintaxis puede variar segun la version VRP. Verificar primero:
+system-view
+interface GigabitEthernet0/0/2
+ mpls ldp ?
+ quit
+return
+
+# Si la ayuda muestra "advertisement", configurar ambos extremos asi:
+
+-------------------------
+S6730H-C, enlace hacia D
+-------------------------
+system-view
+interface GigabitEthernet0/0/2
+ mpls ldp advertisement dod
+ quit
+return
+
+-------------------------
+S6730H-D, enlace hacia C
+-------------------------
+system-view
+interface GigabitEthernet0/0/1
+ mpls ldp advertisement dod
+ quit
+return
+
+# Verificacion:
+display mpls ldp session verbose
+display mpls ldp lsp
+
+
+-------------------------
+RESTAURAR EL MODO DU
+-------------------------
+
+# S6730H-C:
+system-view
+interface GigabitEthernet0/0/2
+ undo mpls ldp advertisement
+ quit
+return
+
+# S6730H-D:
+system-view
+interface GigabitEthernet0/0/1
+ undo mpls ldp advertisement
+ quit
+return
+
+# Si "undo" no restaura el valor predeterminado en la version instalada,
+# consultar "mpls ldp advertisement ?" y seleccionar explicitamente "du".
+
+
+============================================================
+COMANDOS DE DIAGNOSTICO RAPIDO
+============================================================
+
+display interface brief
+display ip interface brief
+display ospf peer brief
+display ip routing-table
+display mpls interface
+display mpls static-lsp verbose
+display mpls ldp interface
+display mpls ldp peer
+display mpls ldp session verbose
+display mpls ldp lsp
+display mpls lsp
+display current-configuration configuration mpls
+
+
+============================================================
+LIMPIEZA FINAL - SOLO CUANDO LO INDIQUE EL INSTRUCTOR
+============================================================
+
+reset saved-configuration
+reboot fast
+
+# Algunas versiones muestran el comando como "reboot-fast".
+# Confirma la sintaxis con "reboot ?" antes de ejecutarlo.
+
+FIN DEL SCRIPT

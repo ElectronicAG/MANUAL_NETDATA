@@ -1,0 +1,432 @@
+
+=== Sesión 2026-09-23T18:42:04-06:00 ===
+
+Selecciona el archivo para el equipo conectado:
+
+  1. configs/AR651-A/01_base_ospf.cfg
+
+  2. configs/AR651-A/01_verificar_ospf.cfg
+
+  3. configs/AR651-A/02_lsp_estatico.cfg
+
+  4. configs/AR651-A/02_verificar_lsp.cfg
+
+  5. configs/AR651-A/03_cambiar_a_ldp.cfg
+
+  6. configs/AR651-A/03_verificar_ldp.cfg
+
+  7. configs/AR651-B/01_base_ospf.cfg
+
+  8. configs/AR651-B/01_verificar_ospf.cfg
+
+  9. configs/AR651-B/02_lsp_estatico.cfg
+
+  10. configs/AR651-B/02_verificar_lsp.cfg
+
+  11. configs/AR651-B/03_cambiar_a_ldp.cfg
+
+  12. configs/AR651-B/03_verificar_ldp.cfg
+
+  13. configs/S6730H-C/01_base_ospf.cfg
+
+  14. configs/S6730H-C/01_verificar_ospf.cfg
+
+  15. configs/S6730H-C/02_lsp_estatico.cfg
+
+  16. configs/S6730H-C/02_verificar_lsp.cfg
+
+  17. configs/S6730H-C/03_cambiar_a_ldp.cfg
+
+  18. configs/S6730H-C/03_verificar_ldp.cfg
+
+  19. configs/S6730H-C/04_dod_opcional.cfg
+
+  20. configs/S6730H-C/05_restaurar_du.cfg
+
+  21. configs/S6730H-D/01_base_ospf.cfg
+
+  22. configs/S6730H-D/01_verificar_ospf.cfg
+
+  23. configs/S6730H-D/02_lsp_estatico.cfg
+
+  24. configs/S6730H-D/02_verificar_lsp.cfg
+
+  25. configs/S6730H-D/03_cambiar_a_ldp.cfg
+
+  26. configs/S6730H-D/03_verificar_ldp.cfg
+
+  27. configs/S6730H-D/04_dod_opcional.cfg
+
+  28. configs/S6730H-D/05_restaurar_du.cfg
+
+Número: 7
+
+Archivo: /home/alan/Documents/100/MANUAL_NETDATA/huawei_serial/configs/AR651-B/01_base_ospf.cfg | Destino declarado: AR651-B
+
+16 comandos; registro: /home/alan/Documents/100/MANUAL_NETDATA/huawei_serial/outpu.txt
+
+Selecciona el puerto serial:
+
+  1. /dev/ttyS0 — n/a
+
+  2. /dev/ttyS1 — n/a
+
+  3. /dev/ttyS10 — n/a
+
+  4. /dev/ttyS11 — n/a
+
+  5. /dev/ttyS12 — n/a
+
+  6. /dev/ttyS13 — n/a
+
+  7. /dev/ttyS14 — n/a
+
+  8. /dev/ttyS15 — n/a
+
+  9. /dev/ttyS16 — n/a
+
+  10. /dev/ttyS17 — n/a
+
+  11. /dev/ttyS18 — n/a
+
+  12. /dev/ttyS19 — n/a
+
+  13. /dev/ttyS2 — n/a
+
+  14. /dev/ttyS20 — n/a
+
+  15. /dev/ttyS21 — n/a
+
+  16. /dev/ttyS22 — n/a
+
+  17. /dev/ttyS23 — n/a
+
+  18. /dev/ttyS24 — n/a
+
+  19. /dev/ttyS25 — n/a
+
+  20. /dev/ttyS26 — n/a
+
+  21. /dev/ttyS27 — n/a
+
+  22. /dev/ttyS28 — n/a
+
+  23. /dev/ttyS29 — n/a
+
+  24. /dev/ttyS3 — n/a
+
+  25. /dev/ttyS30 — n/a
+
+  26. /dev/ttyS31 — n/a
+
+  27. /dev/ttyS4 — n/a
+
+  28. /dev/ttyS5 — n/a
+
+  29. /dev/ttyS6 — n/a
+
+  30. /dev/ttyS7 — n/a
+
+  31. /dev/ttyS8 — n/a
+
+  32. /dev/ttyS9 — n/a
+
+  33. /dev/ttyUSB0 — USB-Serial Controller D
+
+Número: 33
+
+Abriendo /dev/ttyUSB0: 9600 baudios, 8N1, sin control de flujo.
+
+DETENIDO: [Errno 16] could not open port /dev/ttyUSB0: [Errno 16] Device or resource busy: '/dev/ttyUSB0'
+
+No se continúa ni se revierte automáticamente. Comprueba el estado actual antes de reintentar.
+
+=== Fin de sesión ===
+
+=== Sesión 2026-09-23T18:43:06-06:00 ===
+
+Selecciona el archivo para el equipo conectado:
+
+  1. configs/AR651-A/01_base_ospf.cfg
+
+  2. configs/AR651-A/01_verificar_ospf.cfg
+
+  3. configs/AR651-A/02_lsp_estatico.cfg
+
+  4. configs/AR651-A/02_verificar_lsp.cfg
+
+  5. configs/AR651-A/03_cambiar_a_ldp.cfg
+
+  6. configs/AR651-A/03_verificar_ldp.cfg
+
+  7. configs/AR651-B/01_base_ospf.cfg
+
+  8. configs/AR651-B/01_verificar_ospf.cfg
+
+  9. configs/AR651-B/02_lsp_estatico.cfg
+
+  10. configs/AR651-B/02_verificar_lsp.cfg
+
+  11. configs/AR651-B/03_cambiar_a_ldp.cfg
+
+  12. configs/AR651-B/03_verificar_ldp.cfg
+
+  13. configs/S6730H-C/01_base_ospf.cfg
+
+  14. configs/S6730H-C/01_verificar_ospf.cfg
+
+  15. configs/S6730H-C/02_lsp_estatico.cfg
+
+  16. configs/S6730H-C/02_verificar_lsp.cfg
+
+  17. configs/S6730H-C/03_cambiar_a_ldp.cfg
+
+  18. configs/S6730H-C/03_verificar_ldp.cfg
+
+  19. configs/S6730H-C/04_dod_opcional.cfg
+
+  20. configs/S6730H-C/05_restaurar_du.cfg
+
+  21. configs/S6730H-D/01_base_ospf.cfg
+
+  22. configs/S6730H-D/01_verificar_ospf.cfg
+
+  23. configs/S6730H-D/02_lsp_estatico.cfg
+
+  24. configs/S6730H-D/02_verificar_lsp.cfg
+
+  25. configs/S6730H-D/03_cambiar_a_ldp.cfg
+
+  26. configs/S6730H-D/03_verificar_ldp.cfg
+
+  27. configs/S6730H-D/04_dod_opcional.cfg
+
+  28. configs/S6730H-D/05_restaurar_du.cfg
+
+Número: 7
+
+Archivo: /home/alan/Documents/100/MANUAL_NETDATA/huawei_serial/configs/AR651-B/01_base_ospf.cfg | Destino declarado: AR651-B
+
+16 comandos; registro: /home/alan/Documents/100/MANUAL_NETDATA/huawei_serial/outpu.txt
+
+Selecciona el puerto serial:
+
+  1. /dev/ttyS0 — n/a
+
+  2. /dev/ttyS1 — n/a
+
+  3. /dev/ttyS10 — n/a
+
+  4. /dev/ttyS11 — n/a
+
+  5. /dev/ttyS12 — n/a
+
+  6. /dev/ttyS13 — n/a
+
+  7. /dev/ttyS14 — n/a
+
+  8. /dev/ttyS15 — n/a
+
+  9. /dev/ttyS16 — n/a
+
+  10. /dev/ttyS17 — n/a
+
+  11. /dev/ttyS18 — n/a
+
+  12. /dev/ttyS19 — n/a
+
+  13. /dev/ttyS2 — n/a
+
+  14. /dev/ttyS20 — n/a
+
+  15. /dev/ttyS21 — n/a
+
+  16. /dev/ttyS22 — n/a
+
+  17. /dev/ttyS23 — n/a
+
+  18. /dev/ttyS24 — n/a
+
+  19. /dev/ttyS25 — n/a
+
+  20. /dev/ttyS26 — n/a
+
+  21. /dev/ttyS27 — n/a
+
+  22. /dev/ttyS28 — n/a
+
+  23. /dev/ttyS29 — n/a
+
+  24. /dev/ttyS3 — n/a
+
+  25. /dev/ttyS30 — n/a
+
+  26. /dev/ttyS31 — n/a
+
+  27. /dev/ttyS4 — n/a
+
+  28. /dev/ttyS5 — n/a
+
+  29. /dev/ttyS6 — n/a
+
+  30. /dev/ttyS7 — n/a
+
+  31. /dev/ttyS8 — n/a
+
+  32. /dev/ttyS9 — n/a
+
+  33. /dev/ttyUSB0 — USB-Serial Controller D
+
+Número: 33
+
+Abriendo /dev/ttyUSB0: 9600 baudios, 8N1, sin control de flujo.
+
+DETENIDO: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+
+No se continúa ni se revierte automáticamente. Comprueba el estado actual antes de reintentar.
+
+=== Fin de sesión ===
+
+=== Sesión 2026-09-23T18:44:25-06:00 ===
+
+Selecciona el archivo para el equipo conectado:
+
+  1. configs/AR651-A/01_base_ospf.cfg
+
+  2. configs/AR651-A/01_verificar_ospf.cfg
+
+  3. configs/AR651-A/02_lsp_estatico.cfg
+
+  4. configs/AR651-A/02_verificar_lsp.cfg
+
+  5. configs/AR651-A/03_cambiar_a_ldp.cfg
+
+  6. configs/AR651-A/03_verificar_ldp.cfg
+
+  7. configs/AR651-B/01_base_ospf.cfg
+
+  8. configs/AR651-B/01_verificar_ospf.cfg
+
+  9. configs/AR651-B/02_lsp_estatico.cfg
+
+  10. configs/AR651-B/02_verificar_lsp.cfg
+
+  11. configs/AR651-B/03_cambiar_a_ldp.cfg
+
+  12. configs/AR651-B/03_verificar_ldp.cfg
+
+  13. configs/S6730H-C/01_base_ospf.cfg
+
+  14. configs/S6730H-C/01_verificar_ospf.cfg
+
+  15. configs/S6730H-C/02_lsp_estatico.cfg
+
+  16. configs/S6730H-C/02_verificar_lsp.cfg
+
+  17. configs/S6730H-C/03_cambiar_a_ldp.cfg
+
+  18. configs/S6730H-C/03_verificar_ldp.cfg
+
+  19. configs/S6730H-C/04_dod_opcional.cfg
+
+  20. configs/S6730H-C/05_restaurar_du.cfg
+
+  21. configs/S6730H-D/01_base_ospf.cfg
+
+  22. configs/S6730H-D/01_verificar_ospf.cfg
+
+  23. configs/S6730H-D/02_lsp_estatico.cfg
+
+  24. configs/S6730H-D/02_verificar_lsp.cfg
+
+  25. configs/S6730H-D/03_cambiar_a_ldp.cfg
+
+  26. configs/S6730H-D/03_verificar_ldp.cfg
+
+  27. configs/S6730H-D/04_dod_opcional.cfg
+
+  28. configs/S6730H-D/05_restaurar_du.cfg
+
+Número: 7
+
+Archivo: /home/alan/Documents/100/MANUAL_NETDATA/huawei_serial/configs/AR651-B/01_base_ospf.cfg | Destino declarado: AR651-B
+
+16 comandos; registro: /home/alan/Documents/100/MANUAL_NETDATA/huawei_serial/outpu.txt
+
+Selecciona el puerto serial:
+
+  1. /dev/ttyS0 — n/a
+
+  2. /dev/ttyS1 — n/a
+
+  3. /dev/ttyS10 — n/a
+
+  4. /dev/ttyS11 — n/a
+
+  5. /dev/ttyS12 — n/a
+
+  6. /dev/ttyS13 — n/a
+
+  7. /dev/ttyS14 — n/a
+
+  8. /dev/ttyS15 — n/a
+
+  9. /dev/ttyS16 — n/a
+
+  10. /dev/ttyS17 — n/a
+
+  11. /dev/ttyS18 — n/a
+
+  12. /dev/ttyS19 — n/a
+
+  13. /dev/ttyS2 — n/a
+
+  14. /dev/ttyS20 — n/a
+
+  15. /dev/ttyS21 — n/a
+
+  16. /dev/ttyS22 — n/a
+
+  17. /dev/ttyS23 — n/a
+
+  18. /dev/ttyS24 — n/a
+
+  19. /dev/ttyS25 — n/a
+
+  20. /dev/ttyS26 — n/a
+
+  21. /dev/ttyS27 — n/a
+
+  22. /dev/ttyS28 — n/a
+
+  23. /dev/ttyS29 — n/a
+
+  24. /dev/ttyS3 — n/a
+
+  25. /dev/ttyS30 — n/a
+
+  26. /dev/ttyS31 — n/a
+
+  27. /dev/ttyS4 — n/a
+
+  28. /dev/ttyS5 — n/a
+
+  29. /dev/ttyS6 — n/a
+
+  30. /dev/ttyS7 — n/a
+
+  31. /dev/ttyS8 — n/a
+
+  32. /dev/ttyS9 — n/a
+
+  33. /dev/ttyUSB0 — USB-Serial Controller D
+
+Número: 33
+
+Abriendo /dev/ttyUSB0: 9600 baudios, 8N1, sin control de flujo.
+
+DETENIDO: [Errno 13] could not open port /dev/ttyUSB0: [Errno 13] Permission denied: '/dev/ttyUSB0'
+
+No se continúa ni se revierte automáticamente. Comprueba el estado actual antes de reintentar.
+
+=== Fin de sesión ===

@@ -1,0 +1,2 @@
+[console_scripts]
+huawei-serial = code_python.serial_config:main
