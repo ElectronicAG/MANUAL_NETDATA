@@ -17,6 +17,8 @@
 *.toc
 *.tar.gz
 *.zip
+*.bbl-SAVE-ERROR
+*.bcf-SAVE-ERROR
 
 
 __pycache__/
