@@ -634,3 +634,62 @@ ejecutarlo:
 \begin{lstlisting}[style=terminal]
 <HUAWEI> reboot ?
 \end{lstlisting}
+
+
+\subsection{Configuración del acceso SSH}
+
+Para permitir la administración remota del router se generó un par de claves
+RSA, se creó un usuario local con privilegios administrativos y se habilitó
+el servicio STelnet de Huawei.
+
+Primero se generó el par de claves RSA utilizado por el servidor SSH:
+
+\begin{lstlisting}[style=terminal]
+<AR651-A> system-view
+[AR651-A] rsa local-key-pair create
+\end{lstlisting}
+
+Posteriormente, se creó el usuario local \texttt{samuel}, se le asignó el
+nivel máximo de privilegios y se habilitó el servicio SSH:
+
+\begin{lstlisting}[style=terminal]
+[AR651-A] aaa
+[AR651-A-aaa] local-user samuel password cipher samuel123
+[AR651-A-aaa] local-user samuel privilege level 15
+[AR651-A-aaa] local-user samuel service-type ssh
+[AR651-A-aaa] quit
+\end{lstlisting}
+
+Las líneas VTY se configuraron para utilizar autenticación AAA y aceptar
+únicamente conexiones mediante SSH:
+
+\begin{lstlisting}[style=terminal]
+[AR651-A] user-interface vty 0 4
+[AR651-A-ui-vty0-4] authentication-mode aaa
+[AR651-A-ui-vty0-4] protocol inbound ssh
+[AR651-A-ui-vty0-4] quit
+\end{lstlisting}
+
+Finalmente, se permitió el acceso SSH mediante todas las interfaces y se
+habilitó el servicio STelnet:
+
+\begin{lstlisting}[style=terminal]
+[AR651-A] ssh server permit interface all
+[AR651-A] stelnet server enable
+[AR651-A] return
+\end{lstlisting}
+
+La configuración se verificó mediante los siguientes comandos:
+
+\begin{lstlisting}[style=terminal]
+<AR651-A> display ssh server status
+<AR651-A> display ssh user-information
+<AR651-A> display current-configuration configuration user-interface
+\end{lstlisting}
+
+Desde una computadora con conectividad hacia el router, el acceso se realiza
+con el siguiente comando:
+
+\begin{lstlisting}[style=terminal]
+ssh samuel@10.0.12.1
+\end{lstlisting}
