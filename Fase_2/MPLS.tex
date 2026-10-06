@@ -12,6 +12,7 @@ tráfico de la red mediante SNMP y Netdata.
     \includegraphics[scale= 0.9]{Pictures/RED.png}
     \caption{Topologia de la red MPLS}
     \label{CON1}
+
 \end{figure}
 
 Para que el servidor de monitoreo, en este caso la Raspberry Pi, pueda capturar y analizar el tráfico de la red, es necesario que pueda tener comunicación con todos los dispositivos de la red, para esto se configuró rutas estáicas en la Raspberry Pi, de tal manera que pueda alcanzar a todos los dispositivos de la red MPLS. Para eso, se modificó el archivo: sudo nano /etc/netplan/50-cloud-init.yaml 
