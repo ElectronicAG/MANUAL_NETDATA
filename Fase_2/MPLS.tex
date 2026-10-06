@@ -14,9 +14,97 @@ tráfico de la red mediante SNMP y Netdata.
     \label{CON1}
 \end{figure}
 
-Se presenta la configuración de la red MPLS
-en 
+Para que el servidor de monitoreo, en este caso la Raspberry Pi, pueda capturar y analizar el tráfico de la red, es necesario que pueda tener comunicación con todos los dispositivos de la red, para esto se configuró rutas estáicas en la Raspberry Pi, de tal manera que pueda alcanzar a todos los dispositivos de la red MPLS. Para eso, se modificó el archivo: sudo nano /etc/netplan/50-cloud-init.yaml 
 
+Contenido del archivo:
+
+\begin{lstlisting}[style=terminal]
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: false
+      dhcp6: false
+      addresses:
+        - 192.168.10.1/24
+      routes:
+        - to: 1.1.1.1/32
+          via: 192.168.10.2
+        - to: 2.2.2.2/32
+          via: 192.168.10.2
+        - to: 3.3.3.3/32
+          via: 192.168.10.2
+        - to: 4.4.4.4/32
+          via: 192.168.10.2
+\end{lstlisting}
+
+Luego, se confirma la configuración de la red con el comando: 
+\begin{lstlisting}[style=terminal]
+sudo netplan try
+\end{lstlisting}
+
+La Raspberry Pi, probará la configuración de red y si todo está correcto, se aplicará la configuración de manera permanente, al presionar Enter. En caso de que la configuración no sea correcta, se revertirá a la configuración anterior.
+
+Ahora, se debe de configurar netdata, para esto, se modifica el archivo respectivo de netdata, com se realizó en el caítulo 2.
+
+\begin{lstlisting}[style=terminal]
+jobs:
+  - name: ar651_a
+    hostname: 1.1.1.1
+    update_every: 60
+    timeout: 5
+    options:
+      version: 3
+    user:
+      name: netdata-user
+      level: authPriv
+      auth_proto: sha256
+      auth_key: "NetAuth2026"
+      priv_proto: aes
+      priv_key: "NetPriv2026"
+
+  - name: s6730h_c
+    hostname: 2.2.2.2
+    update_every: 60
+    timeout: 5
+    options:
+      version: 3
+    user:
+      name: netdata-user
+      level: authPriv
+      auth_proto: sha256
+      auth_key: "NetAuth2026"
+      priv_proto: aes
+      priv_key: "NetPriv2026"
+
+  - name: s6730h_d
+    hostname: 3.3.3.3
+    update_every: 60
+    timeout: 5
+    options:
+      version: 3
+    user:
+      name: netdata-user
+      level: authPriv
+      auth_proto: sha256
+      auth_key: "NetAuth2026"
+      priv_proto: aes
+      priv_key: "NetPriv2026"
+
+  - name: ar651_b
+    hostname: 4.4.4.4
+    update_every: 60
+    timeout: 5
+    options:
+      version: 3
+    user:
+      name: netdata-user
+      level: authPriv
+      auth_proto: sha256
+      auth_key: "NetAuth2026"
+      priv_proto: aes
+      priv_key: "NetPriv2026"
+\end{lstlisting}
 
 La implementación utiliza dos routers Huawei AR651 como dispositivos de
 borde y dos switches Huawei S6730H como dispositivos de tránsito. La
@@ -62,6 +150,7 @@ omitir.
 [AR651-A-ospf-1] quit
 [AR651-A] return
 \end{lstlisting}
+Como se puede observar, se anuncia la red 192.168.10.0, la cual corresponde a la red de monitoreo donde se encuentra la Raspberry Pi, para que pueda tener comunicación con todos los dispositivos de la red MPLS.
 
 \subsubsection{Configuración de S6730H-C}
 
