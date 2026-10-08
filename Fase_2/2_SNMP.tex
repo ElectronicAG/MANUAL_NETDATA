@@ -31,6 +31,10 @@ Luego de esto, se procedió de igual manera configurando una ip en el puerto del
 
 \end{lstlisting}
 
+En el caso de los switches del laboratorio, se utilizó el siguiente comando, para la interfaz de entrada de SNMP:
+\begin{lstlisting}[style=terminal]
+snmp-agent protocol source-interface LoopBack 0
+\end{lstlisting}
 
 
 \section{Configuración de SNMP en el Router}
@@ -52,6 +56,11 @@ Para monitorear interfaces, tráfico, información del sistema y otros recursos,
 
 \end{lstlisting}
 
+En el caso de los switches del laboratorio, el comando iso es:
+\begin{lstlisting}[style=terminal]
+snmp-agent mib-view included netdata-view iso
+
+\end{lstlisting}
 
 El parámetro \texttt{include} indica que el subárbol especificado será
 incorporado dentro de la vista permitida, mientras que \texttt{iso} representa
@@ -111,6 +120,11 @@ El router pedira contraseña para el usuario, se ingresa la contraseña deseada 
     \caption{Confirmación de configuración de SNMPv3 en el Router}
     
 \end{figure}
+
+
+
+
+
 
 
 
