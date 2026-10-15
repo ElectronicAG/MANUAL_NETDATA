@@ -844,6 +844,9 @@ conectó al router AR651-B y funcionó como servidor. De esta manera, el
 tráfico atravesó los cuatro dispositivos del núcleo: AR651-A, S6730H-C,
 S6730H-D y AR651-B.
 
+La modalidad cliente-servidor y las opciones de las pruebas TCP y UDP se
+fundamentan en el manual de iPerf3~\cite{esnet-iperf3-manual}.
+
 \subsection{Direccionamiento de las redes de prueba}
 
 La tabla \ref{tab:direccionamiento-iperf3} presenta el direccionamiento
@@ -879,9 +882,13 @@ utilizado. En ambas redes se utilizó una máscara de 30 bits, equivalente a
 Las interfaces \texttt{GigabitEthernet0/0/3} son interfaces de acceso hacia
 las computadoras. Por esta razón, no se habilitó MPLS ni LDP directamente en
 ellas. El etiquetado MPLS se aplicó en las interfaces que pertenecen al núcleo
-de la red.
+de la red~\cite[tarea~2.2]{guia-mpls-ar651-s6730h}.
 
 \subsection{Configuración de la red de acceso en AR651-A}
+
+La asignación de direcciones a las interfaces y el anuncio de las redes de
+acceso siguen el procedimiento de configuración de interfaces y OSPF de
+Huawei, adaptado a estas subredes~\cite[sec.~1.4.2, pasos~1--2]{huawei-om-automatico}.
 
 En AR651-A se configuró la dirección \texttt{10.10.10.2/30} y se anunció
 la red mediante OSPF.
@@ -934,6 +941,10 @@ retorno entre ambos extremos.
 
 \subsection{Configuración de las computadoras}
 
+La asignación de la dirección IPv4, el prefijo y la puerta de enlace mediante
+\texttt{New-NetIPAddress} se basa en la referencia del comando de
+Microsoft~\cite{microsoft-new-netipaddress}.
+
 En la computadora generadora se configuraron los siguientes parámetros:
 
 \begin{lstlisting}[style=terminal]
@@ -971,6 +982,9 @@ PS> New-NetIPAddress -InterfaceAlias "Ethernet" `
 Durante la implementación se detectó que Windows seleccionaba la interfaz
 virtual de ZeroTier para alcanzar la red \texttt{20.20.20.0/30}. La interfaz
 elegida por el sistema se comprobó con el siguiente comando:
+La función de \texttt{Find-NetRoute} para identificar la dirección local y
+la ruta hacia un destino está documentada por Microsoft~\cite{microsoft-find-netroute}.
+
 
 \begin{lstlisting}[style=terminal]
 PS> Find-NetRoute -RemoteIPAddress 20.20.20.2
@@ -979,6 +993,9 @@ PS> Find-NetRoute -RemoteIPAddress 20.20.20.2
 Para garantizar que el tráfico de laboratorio utilizara la interfaz Ethernet
 y el router AR651-A, se agregó una ruta más específica desde una consola de
 PowerShell ejecutada como administrador:
+La sintaxis para establecer el prefijo de destino, la interfaz, el siguiente
+salto y la métrica corresponde a \texttt{New-NetRoute}~\cite{microsoft-new-netroute}.
+
 
 \begin{lstlisting}[style=terminal]
 PS> New-NetRoute -InterfaceIndex 13 `
@@ -1007,9 +1024,9 @@ IPv4 convencional debido a que no existía una FEC para las redes de acceso.
 
 Para esta topología de laboratorio se configuró \texttt{lsp-trigger all} en
 los cuatro dispositivos. Con ello, las rutas estáticas y las rutas aprendidas
-por el IGP pueden activar la creación de LSP. Este comando debe utilizarse con
+por el IGP pueden activar la creación de LSP~\cite{huawei-politica-lsp}. Este comando debe utilizarse con
 precaución en redes de producción porque puede aumentar la cantidad de
-etiquetas utilizadas.
+etiquetas utilizadas~\cite{huawei-lsp-trigger-ipv4}.
 
 \subsubsection{Configuración en AR651-A}
 
@@ -1054,6 +1071,9 @@ etiquetas utilizadas.
 En versiones de VRP que no presentan el comando dentro de la vista MPLS, se
 debe consultar la familia IPv4 de LDP y utilizar solamente la variante admitida
 por el dispositivo:
+La variante de \texttt{lsp-trigger} en la familia IPv4 de LDP se documenta
+en la referencia de comandos de Huawei~\cite{huawei-lsp-trigger-ipv4}.
+
 
 \begin{lstlisting}[style=terminal]
 [HUAWEI] mpls ldp
@@ -1066,11 +1086,14 @@ por el dispositivo:
 
 OSPF y MPLS cumplen funciones diferentes. OSPF calcula la ruta IP hacia el
 destino, mientras que LDP distribuye las etiquetas que permiten reenviar los
-paquetes a través de un LSP. Por lo tanto, la presencia de vecinos OSPF y
+paquetes a través de un LSP~\cite[partes~1 y~3]{guia-mpls-ar651-s6730h}. Por lo tanto, la presencia de vecinos OSPF y
 sesiones LDP no era suficiente para demostrar que el tráfico de las
 computadoras estuviera etiquetado.
 
 La verificación se realizó con:
+Los comandos de consulta de vecinos, sesiones y LSP corresponden a las
+verificaciones de la guía de laboratorio~\cite[tareas~3.3--3.4]{guia-mpls-ar651-s6730h}.
+
 
 \begin{lstlisting}[style=terminal]
 <HUAWEI> display mpls ldp peer
@@ -1090,7 +1113,7 @@ Esta entrada confirma que AR651-A funciona como LER de ingreso para la red
 \texttt{20.20.20.0/30}: recibe un paquete IPv4 sin etiqueta y le inserta la
 etiqueta 1029 antes de enviarlo por \texttt{GE0/0/1}. En los switches de
 tránsito se realiza la sustitución de etiquetas y, cerca del extremo de
-salida, puede observarse PHP mediante la etiqueta \textit{Implicit NULL}.
+salida, puede observarse PHP mediante la etiqueta \textit{Implicit NULL}~\cite[tarea~2.3 y pregunta~5.2]{guia-mpls-ar651-s6730h}.
 
 Para comprobar el sentido inverso, en AR651-B se debe verificar una entrada
 con etiqueta de salida para la FEC \texttt{10.10.10.0/30}:
@@ -1101,6 +1124,11 @@ con etiqueta de salida para la FEC \texttt{10.10.10.0/30}:
 \end{lstlisting}
 
 \subsection{Instalación y preparación de iPerf3}
+
+La página de iPerf reúne las opciones de descarga para Windows~\cite{gueant_iperf_2026}.
+La instalación por identificador y versión, con coincidencia exacta, utiliza
+las opciones de \texttt{winget install} documentadas por
+Microsoft~\cite{microsoft-winget-install}.
 
 En las computadoras con Windows se instaló iPerf3 versión 3.20 mediante
 \texttt{winget}:
@@ -1119,6 +1147,10 @@ PS> iperf3 --version
 
 En la computadora receptora se permitieron los puertos TCP y UDP 5201 desde
 PowerShell con privilegios de administrador:
+El puerto predeterminado de iPerf3 es 5201~\cite{esnet-iperf3-manual};
+las reglas de entrada se crean mediante el comando
+\texttt{New-NetFirewallRule}~\cite{microsoft-new-netfirewallrule}.
+
 
 \begin{lstlisting}[style=terminal]
 PS> New-NetFirewallRule -DisplayName "iPerf3 TCP 5201" `
@@ -1128,6 +1160,10 @@ PS> New-NetFirewallRule -DisplayName "iPerf3 UDP 5201" `
 \end{lstlisting}
 
 \subsection{Pruebas de rendimiento con TCP}
+
+Las opciones \texttt{-s}, \texttt{-c}, \texttt{-t} e \texttt{-i} seleccionan
+el modo servidor, el destino del cliente, la duración y el intervalo de
+reporte, respectivamente~\cite{esnet-iperf3-manual}.
 
 En la computadora receptora, con dirección \texttt{20.20.20.1}, se inició
 el servidor:
@@ -1151,13 +1187,13 @@ en las cabeceras Ethernet, MPLS, IP y TCP.
 La prueba TCP predeterminada es unidireccional: el cliente envía los datos y
 el servidor devuelve confirmaciones TCP. Estas confirmaciones no representan
 un flujo de datos equivalente en sentido contrario. Para probar el sentido
-inverso se utiliza la opción \texttt{-R}:
+inverso se utiliza la opción \texttt{-R}~\cite{esnet-iperf3-manual}:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -R
 \end{lstlisting}
 
-Para cuatro flujos TCP simultáneos se puede utilizar:
+Para cuatro flujos TCP simultáneos se puede utilizar~\cite{esnet-iperf3-manual}:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -P 4
@@ -1167,7 +1203,7 @@ PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -P 4
 
 A diferencia de TCP, UDP no ajusta automáticamente la velocidad ni
 retransmite datagramas perdidos. La opción \texttt{-b} especifica el ancho de
-banda solicitado. La prueba debe comenzar con una tasa moderada y aumentar de
+banda solicitado~\cite{esnet-iperf3-manual}. La prueba debe comenzar con una tasa moderada y aumentar de
 forma gradual.
 
 Prueba UDP a 500 Mbit/s:
@@ -1188,7 +1224,7 @@ Prueba UDP en sentido inverso:
 PS> iperf3 -c 20.20.20.1 -u -b 900M -t 120 -i 1 -R
 \end{lstlisting}
 
-Prueba UDP bidireccional a 400 Mbit/s por sentido:
+Prueba UDP bidireccional a 400 Mbit/s por sentido~\cite{esnet-iperf3-manual}:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 -c 20.20.20.1 -u -b 400M -t 120 -i 1 --bidir
