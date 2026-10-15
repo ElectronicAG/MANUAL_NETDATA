@@ -1,21 +1,26 @@
 \section{Topología de la red MPLS}
 
-La figura ~\ref{CON1} presenta la topología de la 
-red MPLS utilizada en el proyecto. 
-En esta topología, se puede observar la interconexión 
-entre los routers y la Raspberry Pi, que actúa como 
-un nodo de monitoreo para capturar y analizar el 
+La figura~\ref{CON1} presenta la topología de la red MPLS utilizada en el
+proyecto. En esta topología se observa la interconexión entre los routers y la
+Raspberry Pi, que actúa como nodo de monitoreo para capturar y analizar el
 tráfico de la red mediante SNMP y Netdata.
 
 \begin{figure}[H]
+
     \centering
+
     \includegraphics[scale= 0.9]{Pictures/RED.png}
+
     \caption{Topologia de la red MPLS}
+
     \label{CON1}
 
 \end{figure}
 
-Para que el servidor de monitoreo, en este caso la Raspberry Pi, pueda capturar y analizar el tráfico de la red, es necesario que pueda tener comunicación con todos los dispositivos de la red, para esto se configuró rutas estáicas en la Raspberry Pi, de tal manera que pueda alcanzar a todos los dispositivos de la red MPLS. Para eso, se modificó el archivo: sudo nano /etc/netplan/50-cloud-init.yaml 
+Para que el servidor de monitoreo pueda capturar y analizar el tráfico, debe
+tener comunicación con todos los dispositivos de la red. Para ello se
+configuraron rutas estáticas en la Raspberry Pi mediante el archivo
+\texttt{/etc/netplan/50-cloud-init.yaml}.
 
 Contenido del archivo:
 
@@ -39,14 +44,16 @@ network:
           via: 192.168.10.2
 \end{lstlisting}
 
-Luego, se confirma la configuración de la red con el comando: 
+Luego, se confirma la configuración de la red con el comando:
+
 \begin{lstlisting}[style=terminal]
 sudo netplan try
 \end{lstlisting}
 
 La Raspberry Pi, probará la configuración de red y si todo está correcto, se aplicará la configuración de manera permanente, al presionar Enter. En caso de que la configuración no sea correcta, se revertirá a la configuración anterior.
 
-Ahora, se debe de configurar netdata, para esto, se modifica el archivo respectivo de netdata, com se realizó en el caítulo 2.
+Después se configura Netdata modificando el archivo correspondiente, como se
+explicó en el capítulo 2.
 
 \begin{lstlisting}[style=terminal]
 jobs:
@@ -63,7 +70,6 @@ jobs:
       auth_key: "NetAuth2026"
       priv_proto: aes
       priv_key: "NetPriv2026"
-
   - name: s6730h_c
     hostname: 2.2.2.2
     update_every: 10
@@ -77,7 +83,6 @@ jobs:
       auth_key: "NetAuth2026"
       priv_proto: aes
       priv_key: "NetPriv2026"
-
   - name: s6730h_d
     hostname: 3.3.3.3
     update_every: 10
@@ -91,7 +96,6 @@ jobs:
       auth_key: "NetAuth2026"
       priv_proto: aes
       priv_key: "NetPriv2026"
-
   - name: ar651_b
     hostname: 4.4.4.4
     update_every: 10
@@ -108,12 +112,17 @@ jobs:
 \end{lstlisting}
 
 La implementación utiliza dos routers Huawei AR651 como dispositivos de
+
 borde y dos switches Huawei S6730H como dispositivos de tránsito. La
+
 configuración se divide en cuatro etapas: configuración del protocolo OSPF,
+
 creación de un LSP estático, implementación de LDP y modificación del modo
+
 de anuncio de etiquetas.
 
 Antes de ejecutar los comandos se debe comprobar el nombre real de las
+
 interfaces:
 
 \begin{lstlisting}[style=terminal]
@@ -121,8 +130,11 @@ interfaces:
 \end{lstlisting}
 
 Los puertos Ethernet de los switches S6730H deben funcionar como interfaces
+
 de capa 3. Para ello se utiliza el comando \texttt{undo portswitch}. Si el
+
 comando no está disponible o la interfaz ya trabaja en capa 3, se puede
+
 omitir.
 
 \subsection{Configuración base y OSPF}
@@ -132,16 +144,13 @@ omitir.
 \begin{lstlisting}[style=terminal]
 <HUAWEI> system-view
 [HUAWEI] sysname AR651-A
-
 [AR651-A] interface GigabitEthernet0/0/1
 [AR651-A-GigabitEthernet0/0/1] ip address 10.0.12.1 255.255.255.252
 [AR651-A-GigabitEthernet0/0/1] undo shutdown
 [AR651-A-GigabitEthernet0/0/1] quit
-
 [AR651-A] interface LoopBack0
 [AR651-A-LoopBack0] ip address 1.1.1.1 255.255.255.255
 [AR651-A-LoopBack0] quit
-
 [AR651-A] ospf 1
 [AR651-A-ospf-1] area 0.0.0.0
 [AR651-A-ospf-1-area-0.0.0.0] network 1.1.1.1 0.0.0.0
@@ -151,6 +160,7 @@ omitir.
 [AR651-A-ospf-1] quit
 [AR651-A] return
 \end{lstlisting}
+
 Como se puede observar, se anuncia la red 192.168.10.0, la cual corresponde a la red de monitoreo donde se encuentra la Raspberry Pi, para que pueda tener comunicación con todos los dispositivos de la red MPLS.
 
 \subsubsection{Configuración de S6730H-C}
@@ -158,23 +168,19 @@ Como se puede observar, se anuncia la red 192.168.10.0, la cual corresponde a la
 \begin{lstlisting}[style=terminal]
 <HUAWEI> system-view
 [HUAWEI] sysname S6730H-C
-
 [S6730H-C] interface GigabitEthernet0/0/1
 [S6730H-C-GigabitEthernet0/0/1] undo portswitch
 [S6730H-C-GigabitEthernet0/0/1] ip address 10.0.12.2 255.255.255.252
 [S6730H-C-GigabitEthernet0/0/1] undo shutdown
 [S6730H-C-GigabitEthernet0/0/1] quit
-
 [S6730H-C] interface GigabitEthernet0/0/2
 [S6730H-C-GigabitEthernet0/0/2] undo portswitch
 [S6730H-C-GigabitEthernet0/0/2] ip address 10.0.23.1 255.255.255.252
 [S6730H-C-GigabitEthernet0/0/2] undo shutdown
 [S6730H-C-GigabitEthernet0/0/2] quit
-
 [S6730H-C] interface LoopBack0
 [S6730H-C-LoopBack0] ip address 2.2.2.2 255.255.255.255
 [S6730H-C-LoopBack0] quit
-
 [S6730H-C] ospf 1
 [S6730H-C-ospf-1] area 0.0.0.0
 [S6730H-C-ospf-1-area-0.0.0.0] network 2.2.2.2 0.0.0.0
@@ -190,23 +196,19 @@ Como se puede observar, se anuncia la red 192.168.10.0, la cual corresponde a la
 \begin{lstlisting}[style=terminal]
 <HUAWEI> system-view
 [HUAWEI] sysname S6730H-D
-
 [S6730H-D] interface GigabitEthernet0/0/1
 [S6730H-D-GigabitEthernet0/0/1] undo portswitch
 [S6730H-D-GigabitEthernet0/0/1] ip address 10.0.23.2 255.255.255.252
 [S6730H-D-GigabitEthernet0/0/1] undo shutdown
 [S6730H-D-GigabitEthernet0/0/1] quit
-
 [S6730H-D] interface GigabitEthernet0/0/2
 [S6730H-D-GigabitEthernet0/0/2] undo portswitch
 [S6730H-D-GigabitEthernet0/0/2] ip address 10.0.34.1 255.255.255.252
 [S6730H-D-GigabitEthernet0/0/2] undo shutdown
 [S6730H-D-GigabitEthernet0/0/2] quit
-
 [S6730H-D] interface LoopBack0
 [S6730H-D-LoopBack0] ip address 3.3.3.3 255.255.255.255
 [S6730H-D-LoopBack0] quit
-
 [S6730H-D] ospf 1
 [S6730H-D-ospf-1] area 0.0.0.0
 [S6730H-D-ospf-1-area-0.0.0.0] network 3.3.3.3 0.0.0.0
@@ -222,16 +224,13 @@ Como se puede observar, se anuncia la red 192.168.10.0, la cual corresponde a la
 \begin{lstlisting}[style=terminal]
 <HUAWEI> system-view
 [HUAWEI] sysname AR651-B
-
 [AR651-B] interface GigabitEthernet0/0/1
 [AR651-B-GigabitEthernet0/0/1] ip address 10.0.34.2 255.255.255.252
 [AR651-B-GigabitEthernet0/0/1] undo shutdown
 [AR651-B-GigabitEthernet0/0/1] quit
-
 [AR651-B] interface LoopBack0
 [AR651-B-LoopBack0] ip address 4.4.4.4 255.255.255.255
 [AR651-B-LoopBack0] quit
-
 [AR651-B] ospf 1
 [AR651-B-ospf-1] area 0.0.0.0
 [AR651-B-ospf-1-area-0.0.0.0] network 4.4.4.4 0.0.0.0
@@ -244,6 +243,7 @@ Como se puede observar, se anuncia la red 192.168.10.0, la cual corresponde a la
 \subsubsection{Verificación de OSPF}
 
 Los siguientes comandos deben ejecutarse en los dispositivos para comprobar
+
 las adyacencias y las rutas aprendidas mediante OSPF:
 
 \begin{lstlisting}[style=terminal]
@@ -252,6 +252,7 @@ las adyacencias y las rutas aprendidas mediante OSPF:
 \end{lstlisting}
 
 Desde AR651-A se comprueba la comunicación entre las loopbacks de ambos
+
 extremos:
 
 \begin{lstlisting}[style=terminal]
@@ -259,6 +260,7 @@ extremos:
 \end{lstlisting}
 
 No se debe continuar con MPLS hasta obtener respuesta y comprobar que existe
+
 una ruta hacia \texttt{4.4.4.4/32}:
 
 \begin{lstlisting}[style=terminal]
@@ -270,13 +272,19 @@ una ruta hacia \texttt{4.4.4.4/32}:
 El plan de etiquetas empleado es el siguiente:
 
 \begin{itemize}
+
     \item AR651-A inserta la etiqueta 100.
+
     \item S6730H-C recibe la etiqueta 100 y la sustituye por la etiqueta 200.
+
     \item S6730H-D recibe la etiqueta 200 y la sustituye por la etiqueta 300.
+
     \item AR651-B recibe y elimina la etiqueta 300.
+
 \end{itemize}
 
 Esta implementación corresponde a un LSP estático convencional. El
+
 comportamiento PHP se observará posteriormente con LDP.
 
 \subsubsection{Configuración MPLS de AR651-A}
@@ -286,11 +294,9 @@ comportamiento PHP se observará posteriormente con LDP.
 [AR651-A] mpls lsr-id 1.1.1.1
 [AR651-A] mpls
 [AR651-A-mpls] quit
-
 [AR651-A] interface GigabitEthernet0/0/1
 [AR651-A-GigabitEthernet0/0/1] mpls
 [AR651-A-GigabitEthernet0/0/1] quit
-
 [AR651-A] static-lsp ingress LSP-A-B destination 4.4.4.4 32 nexthop 10.0.12.2 out-label 100
 [AR651-A] return
 \end{lstlisting}
@@ -302,15 +308,12 @@ comportamiento PHP se observará posteriormente con LDP.
 [S6730H-C] mpls lsr-id 2.2.2.2
 [S6730H-C] mpls
 [S6730H-C-mpls] quit
-
 [S6730H-C] interface GigabitEthernet0/0/1
 [S6730H-C-GigabitEthernet0/0/1] mpls
 [S6730H-C-GigabitEthernet0/0/1] quit
-
 [S6730H-C] interface GigabitEthernet0/0/2
 [S6730H-C-GigabitEthernet0/0/2] mpls
 [S6730H-C-GigabitEthernet0/0/2] quit
-
 [S6730H-C] static-lsp transit LSP-A-B incoming-interface GigabitEthernet0/0/1 in-label 100 nexthop 10.0.23.2 out-label 200
 [S6730H-C] return
 \end{lstlisting}
@@ -322,15 +325,12 @@ comportamiento PHP se observará posteriormente con LDP.
 [S6730H-D] mpls lsr-id 3.3.3.3
 [S6730H-D] mpls
 [S6730H-D-mpls] quit
-
 [S6730H-D] interface GigabitEthernet0/0/1
 [S6730H-D-GigabitEthernet0/0/1] mpls
 [S6730H-D-GigabitEthernet0/0/1] quit
-
 [S6730H-D] interface GigabitEthernet0/0/2
 [S6730H-D-GigabitEthernet0/0/2] mpls
 [S6730H-D-GigabitEthernet0/0/2] quit
-
 [S6730H-D] static-lsp transit LSP-A-B incoming-interface GigabitEthernet0/0/1 in-label 200 nexthop 10.0.34.2 out-label 300
 [S6730H-D] return
 \end{lstlisting}
@@ -342,11 +342,9 @@ comportamiento PHP se observará posteriormente con LDP.
 [AR651-B] mpls lsr-id 4.4.4.4
 [AR651-B] mpls
 [AR651-B-mpls] quit
-
 [AR651-B] interface GigabitEthernet0/0/1
 [AR651-B-GigabitEthernet0/0/1] mpls
 [AR651-B-GigabitEthernet0/0/1] quit
-
 [AR651-B] static-lsp egress LSP-A-B incoming-interface GigabitEthernet0/0/1 in-label 300
 [AR651-B] return
 \end{lstlisting}
@@ -391,6 +389,7 @@ En AR651-A se apaga la interfaz conectada con S6730H-C:
 \end{lstlisting}
 
 Después de esperar aproximadamente 30 segundos se comprueba el estado del
+
 LSP:
 
 \begin{lstlisting}[style=terminal]
@@ -399,7 +398,9 @@ LSP:
 \end{lstlisting}
 
 Debido a que la topología es lineal y no existe otra ruta, el equipo puede
+
 indicar que el LSP especificado no existe. Este resultado confirma que el LSP
+
 estático no puede redirigirse automáticamente.
 
 El enlace debe restaurarse antes de continuar:
@@ -463,6 +464,7 @@ Se confirma que las entradas estáticas fueron eliminadas:
 \subsection{Configuración de LDP}
 
 La configuración global de MPLS y la habilitación de MPLS en las interfaces
+
 se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 
 \subsubsection{Configuración de LDP en AR651-A}
@@ -471,7 +473,6 @@ se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 <AR651-A> system-view
 [AR651-A] mpls ldp
 [AR651-A-mpls-ldp] quit
-
 [AR651-A] interface GigabitEthernet0/0/1
 [AR651-A-GigabitEthernet0/0/1] mpls ldp
 [AR651-A-GigabitEthernet0/0/1] quit
@@ -484,11 +485,9 @@ se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 <S6730H-C> system-view
 [S6730H-C] mpls ldp
 [S6730H-C-mpls-ldp] quit
-
 [S6730H-C] interface GigabitEthernet0/0/1
 [S6730H-C-GigabitEthernet0/0/1] mpls ldp
 [S6730H-C-GigabitEthernet0/0/1] quit
-
 [S6730H-C] interface GigabitEthernet0/0/2
 [S6730H-C-GigabitEthernet0/0/2] mpls ldp
 [S6730H-C-GigabitEthernet0/0/2] quit
@@ -501,11 +500,9 @@ se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 <S6730H-D> system-view
 [S6730H-D] mpls ldp
 [S6730H-D-mpls-ldp] quit
-
 [S6730H-D] interface GigabitEthernet0/0/1
 [S6730H-D-GigabitEthernet0/0/1] mpls ldp
 [S6730H-D-GigabitEthernet0/0/1] quit
-
 [S6730H-D] interface GigabitEthernet0/0/2
 [S6730H-D-GigabitEthernet0/0/2] mpls ldp
 [S6730H-D-GigabitEthernet0/0/2] quit
@@ -518,7 +515,6 @@ se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 <AR651-B> system-view
 [AR651-B] mpls ldp
 [AR651-B-mpls-ldp] quit
-
 [AR651-B] interface GigabitEthernet0/0/1
 [AR651-B-GigabitEthernet0/0/1] mpls ldp
 [AR651-B-GigabitEthernet0/0/1] quit
@@ -528,6 +524,7 @@ se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 \subsubsection{Verificación de LDP}
 
 Los siguientes comandos permiten verificar las interfaces, vecinos, sesiones
+
 y etiquetas de LDP:
 
 \begin{lstlisting}[style=terminal]
@@ -540,6 +537,7 @@ y etiquetas de LDP:
 \end{lstlisting}
 
 Una sesión LDP completamente establecida debe aparecer en estado
+
 \texttt{Operational}.
 
 Desde AR651-A se comprueba el plano de datos:
@@ -584,7 +582,9 @@ Después de esperar se comprueba el LSP:
 \end{lstlisting}
 
 En la topología lineal no existe una ruta alternativa. Por esta razón, LDP
+
 solamente puede converger por otro camino si se agrega un segundo enlace
+
 físico y OSPF aprende una ruta alternativa.
 
 Finalmente se restaura la interfaz:
@@ -600,6 +600,7 @@ Finalmente se restaura la interfaz:
 \subsection{Cambio del modo de anuncio a DoD}
 
 Antes de modificar el modo de anuncio, se comprueba la configuración actual
+
 en S6730H-C:
 
 \begin{lstlisting}[style=terminal]
@@ -607,8 +608,9 @@ en S6730H-C:
 <S6730H-C> display mpls ldp session verbose
 \end{lstlisting}
 
-El modo predeterminado es DU, correspondiente a \textit{Downstream
-Unsolicited}. Para comprobar la sintaxis disponible en el equipo:
+El modo predeterminado es DU, correspondiente a \textit{Downstream Unsolicited}.
+
+Para comprobar la sintaxis disponible en el equipo:
 
 \begin{lstlisting}[style=terminal]
 <S6730H-C> system-view
@@ -639,6 +641,7 @@ Unsolicited}. Para comprobar la sintaxis disponible en el equipo:
 \end{lstlisting}
 
 El cambio del modo de anuncio puede provocar el reinicio temporal de la
+
 sesión LDP. Después del cambio se verifica:
 
 \begin{lstlisting}[style=terminal]
@@ -669,6 +672,7 @@ En S6730H-D:
 \end{lstlisting}
 
 También puede restaurarse el valor predeterminado con el comando
+
 \texttt{undo}, si la versión de VRP instalada lo admite:
 
 \begin{lstlisting}[style=terminal]
@@ -679,6 +683,7 @@ También puede restaurarse el valor predeterminado con el comando
 \subsection{Comandos de diagnóstico}
 
 Los siguientes comandos pueden utilizarse en los cuatro dispositivos para
+
 identificar problemas de interfaces, direccionamiento, OSPF, MPLS y LDP:
 
 \begin{lstlisting}[style=terminal]
@@ -709,6 +714,7 @@ La configuración solamente debe guardarse cuando lo autorice el instructor:
 \subsection{Limpieza final}
 
 Los siguientes comandos eliminan la configuración almacenada y reinician el
+
 dispositivo. Solamente deben utilizarse cuando lo indique el instructor:
 
 \begin{lstlisting}[style=terminal]
@@ -717,18 +723,21 @@ dispositivo. Solamente deben utilizarse cuando lo indique el instructor:
 \end{lstlisting}
 
 En algunas versiones de VRP el segundo comando puede aparecer como
+
 \texttt{reboot-fast}. La sintaxis disponible puede comprobarse antes de
+
 ejecutarlo:
 
 \begin{lstlisting}[style=terminal]
 <HUAWEI> reboot ?
 \end{lstlisting}
 
-
 \subsection{Configuración del acceso SSH}
 
 Para permitir la administración remota del router se generó un par de claves
+
 RSA, se creó un usuario local con privilegios administrativos y se habilitó
+
 el servicio STelnet de Huawei.
 
 Primero se generó el par de claves RSA utilizado por el servidor SSH:
@@ -739,6 +748,7 @@ Primero se generó el par de claves RSA utilizado por el servidor SSH:
 \end{lstlisting}
 
 Posteriormente, se creó el usuario local \texttt{samuel}, se le asignó el
+
 nivel máximo de privilegios y se habilitó el servicio SSH:
 
 \begin{lstlisting}[style=terminal]
@@ -750,6 +760,7 @@ nivel máximo de privilegios y se habilitó el servicio SSH:
 \end{lstlisting}
 
 Las líneas VTY se configuraron para utilizar autenticación AAA y aceptar
+
 únicamente conexiones mediante SSH:
 
 \begin{lstlisting}[style=terminal]
@@ -760,6 +771,7 @@ Las líneas VTY se configuraron para utilizar autenticación AAA y aceptar
 \end{lstlisting}
 
 Finalmente, se permitió el acceso SSH mediante todas las interfaces y se
+
 habilitó el servicio STelnet:
 
 \begin{lstlisting}[style=terminal]
@@ -777,8 +789,388 @@ La configuración se verificó mediante los siguientes comandos:
 \end{lstlisting}
 
 Desde una computadora con conectividad hacia el router, el acceso se realiza
+
 con el siguiente comando:
 
 \begin{lstlisting}[style=terminal]
 ssh samuel@10.0.12.1
 \end{lstlisting}
+\section{Generaci\'on y verificaci\'on de tr\'afico sobre MPLS}
+\label{sec:pruebas-mpls-iperf3}
+
+Una vez establecidas las sesiones LDP, se agregaron dos redes de acceso para
+generar tr\'afico de extremo a extremo. La primera computadora se conect\'o al
+router AR651-A y funcion\'o como cliente de \textit{iPerf3}; la segunda se
+conect\'o al router AR651-B y funcion\'o como servidor. De esta manera, el
+tr\'afico atraves\'o los cuatro dispositivos del n\'ucleo: AR651-A, S6730H-C,
+S6730H-D y AR651-B.
+
+\subsection{Direccionamiento de las redes de prueba}
+
+La tabla \ref{tab:direccionamiento-iperf3} presenta el direccionamiento
+utilizado. En ambas redes se utiliz\'o una m\'ascara de 30 bits, equivalente a
+\texttt{255.255.255.252}.
+
+\begin{table}[H]
+    \centering
+    \caption{Direccionamiento para las pruebas de tr\'afico}
+    \label{tab:direccionamiento-iperf3}
+    \begin{tabular}{|p{3.5cm}|p{2.5cm}|p{3.1cm}|p{3.4cm}|}
+        \hline
+        \textbf{Dispositivo} & \textbf{Interfaz} & \textbf{Direcci\'on IP} & \textbf{Puerta de enlace} \\ \hline
+        Computadora generadora & Ethernet & 10.10.10.1/30 & 10.10.10.2 \\ \hline
+        AR651-A & GE0/0/3 & 10.10.10.2/30 & No aplica \\ \hline
+        AR651-B & GE0/0/3 & 20.20.20.2/30 & No aplica \\ \hline
+        Computadora receptora & Ethernet & 20.20.20.1/30 & 20.20.20.2 \\ \hline
+    \end{tabular}
+\end{table}
+
+Las interfaces \texttt{GigabitEthernet0/0/3} son interfaces de acceso hacia
+las computadoras. Por esta raz\'on, no se habilit\'o MPLS ni LDP directamente en
+ellas. El etiquetado MPLS se aplic\'o en las interfaces que pertenecen al n\'ucleo
+de la red.
+
+\subsection{Configuraci\'on de la red de acceso en AR651-A}
+
+En AR651-A se configur\'o la direcci\'on \texttt{10.10.10.2/30} y se anunci\'o
+la red mediante OSPF.
+
+\begin{lstlisting}[style=terminal]
+<AR651-A> system-view
+[AR651-A] interface GigabitEthernet0/0/3
+[AR651-A-GigabitEthernet0/0/3] ip address 10.10.10.2 255.255.255.252
+[AR651-A-GigabitEthernet0/0/3] undo shutdown
+[AR651-A-GigabitEthernet0/0/3] quit
+[AR651-A] ospf 1
+[AR651-A-ospf-1] area 0.0.0.0
+[AR651-A-ospf-1-area-0.0.0.0] network 10.10.10.0 0.0.0.3
+[AR651-A-ospf-1-area-0.0.0.0] quit
+[AR651-A-ospf-1] quit
+[AR651-A] return
+\end{lstlisting}
+
+\subsection{Configuraci\'on de la red de acceso en AR651-B}
+
+En AR651-B se configur\'o la direcci\'on \texttt{20.20.20.2/30} y tambi\'en se
+anunci\'o la red mediante OSPF.
+
+\begin{lstlisting}[style=terminal]
+<AR651-B> system-view
+[AR651-B] interface GigabitEthernet0/0/3
+[AR651-B-GigabitEthernet0/0/3] ip address 20.20.20.2 255.255.255.252
+[AR651-B-GigabitEthernet0/0/3] undo shutdown
+[AR651-B-GigabitEthernet0/0/3] quit
+[AR651-B] ospf 1
+[AR651-B-ospf-1] area 0.0.0.0
+[AR651-B-ospf-1-area-0.0.0.0] network 20.20.20.0 0.0.0.3
+[AR651-B-ospf-1-area-0.0.0.0] quit
+[AR651-B-ospf-1] quit
+[AR651-B] return
+\end{lstlisting}
+
+La propagaci\'on de las dos redes se verific\'o con los siguientes comandos:
+
+\begin{lstlisting}[style=terminal]
+<AR651-A> display ip routing-table 20.20.20.0
+<AR651-B> display ip routing-table 10.10.10.0
+<AR651-A> ping -a 10.10.10.2 20.20.20.2
+<AR651-B> ping -a 20.20.20.2 10.10.10.2
+\end{lstlisting}
+
+El ping originado en AR651-A obtuvo respuesta de AR651-B con una p\'erdida del
+0\,\%, lo cual confirm\'o que OSPF proporcionaba conectividad y una ruta de
+retorno entre ambos extremos.
+
+\subsection{Configuraci\'on de las computadoras}
+
+En la computadora generadora se configuraron los siguientes par\'ametros:
+
+\begin{lstlisting}[style=terminal]
+Direcci\'on IPv4: 10.10.10.1
+Longitud de prefijo: 30
+Puerta de enlace: 10.10.10.2
+\end{lstlisting}
+
+La configuraci\'on puede aplicarse desde PowerShell con privilegios de
+administrador. El \'indice 13 corresponde a la interfaz Ethernet utilizada en
+la prueba y debe sustituirse si Windows muestra un valor diferente.
+
+\begin{lstlisting}[style=terminal]
+PS> New-NetIPAddress -InterfaceIndex 13 `
+      -IPAddress 10.10.10.1 `
+      -PrefixLength 30 `
+      -DefaultGateway 10.10.10.2
+\end{lstlisting}
+
+En la computadora receptora se configuraron los siguientes valores:
+
+\begin{lstlisting}[style=terminal]
+Direcci\'on IPv4: 20.20.20.1
+Longitud de prefijo: 30
+Puerta de enlace: 20.20.20.2
+\end{lstlisting}
+
+\begin{lstlisting}[style=terminal]
+PS> New-NetIPAddress -InterfaceAlias "Ethernet" `
+      -IPAddress 20.20.20.1 `
+      -PrefixLength 30 `
+      -DefaultGateway 20.20.20.2
+\end{lstlisting}
+
+Durante la implementaci\'on se detect\'o que Windows seleccionaba la interfaz
+virtual de ZeroTier para alcanzar la red \texttt{20.20.20.0/30}. La interfaz
+elegida por el sistema se comprob\'o con el siguiente comando:
+
+\begin{lstlisting}[style=terminal]
+PS> Find-NetRoute -RemoteIPAddress 20.20.20.2
+\end{lstlisting}
+
+Para garantizar que el tr\'afico de laboratorio utilizara la interfaz Ethernet
+y el router AR651-A, se agreg\'o una ruta m\'as espec\'ifica desde una consola de
+PowerShell ejecutada como administrador:
+
+\begin{lstlisting}[style=terminal]
+PS> New-NetRoute -InterfaceIndex 13 `
+      -DestinationPrefix "20.20.20.0/30" `
+      -NextHop 10.10.10.2 `
+      -RouteMetric 1
+\end{lstlisting}
+
+Despu\'es del cambio, \texttt{Find-NetRoute} mostr\'o la interfaz Ethernet, el
+\texttt{InterfaceIndex 13} y el siguiente salto \texttt{10.10.10.2}. La
+conectividad se valid\'o con:
+
+\begin{lstlisting}[style=terminal]
+PS> ping 10.10.10.2
+PS> ping 20.20.20.2
+PS> ping 20.20.20.1
+PS> tracert -d 20.20.20.1
+\end{lstlisting}
+
+\subsection{Creaci\'on de LSP para las redes de acceso}
+
+Inicialmente, la salida de \texttt{display mpls ldp lsp} mostraba LSP
+\'unicamente para las direcciones de loopback \texttt{/32}. En ese estado,
+LDP estaba operativo, pero el tr\'afico entre las computadoras se reenviaba como
+IPv4 convencional debido a que no exist\'ia una FEC para las redes de acceso.
+
+Para esta topolog\'ia de laboratorio se configur\'o \texttt{lsp-trigger all} en
+los cuatro dispositivos. Con ello, las rutas est\'aticas y las rutas aprendidas
+por el IGP pueden activar la creaci\'on de LSP. Este comando debe utilizarse con
+precauci\'on en redes de producci\'on porque puede aumentar la cantidad de
+etiquetas utilizadas.
+
+\subsubsection{Configuraci\'on en AR651-A}
+
+\begin{lstlisting}[style=terminal]
+<AR651-A> system-view
+[AR651-A] mpls
+[AR651-A-mpls] lsp-trigger all
+[AR651-A-mpls] quit
+[AR651-A] return
+\end{lstlisting}
+
+\subsubsection{Configuraci\'on en S6730H-C}
+
+\begin{lstlisting}[style=terminal]
+<S6730H-C> system-view
+[S6730H-C] mpls
+[S6730H-C-mpls] lsp-trigger all
+[S6730H-C-mpls] quit
+[S6730H-C] return
+\end{lstlisting}
+
+\subsubsection{Configuraci\'on en S6730H-D}
+
+\begin{lstlisting}[style=terminal]
+<S6730H-D> system-view
+[S6730H-D] mpls
+[S6730H-D-mpls] lsp-trigger all
+[S6730H-D-mpls] quit
+[S6730H-D] return
+\end{lstlisting}
+
+\subsubsection{Configuraci\'on en AR651-B}
+
+\begin{lstlisting}[style=terminal]
+<AR651-B> system-view
+[AR651-B] mpls
+[AR651-B-mpls] lsp-trigger all
+[AR651-B-mpls] quit
+[AR651-B] return
+\end{lstlisting}
+
+En versiones de VRP que no presentan el comando dentro de la vista MPLS, se
+debe consultar la familia IPv4 de LDP y utilizar solamente la variante admitida
+por el dispositivo:
+
+\begin{lstlisting}[style=terminal]
+[HUAWEI] mpls ldp
+[HUAWEI-mpls-ldp] ipv4-family
+[HUAWEI-mpls-ldp-ipv4] lsp-trigger ?
+[HUAWEI-mpls-ldp-ipv4] lsp-trigger all
+\end{lstlisting}
+
+\subsection{Verificaci\'on del etiquetado MPLS}
+
+OSPF y MPLS cumplen funciones diferentes. OSPF calcula la ruta IP hacia el
+destino, mientras que LDP distribuye las etiquetas que permiten reenviar los
+paquetes a trav\'es de un LSP. Por lo tanto, la presencia de vecinos OSPF y
+sesiones LDP no era suficiente para demostrar que el tr\'afico de las
+computadoras estuviera etiquetado.
+
+La verificaci\'on se realiz\'o con:
+
+\begin{lstlisting}[style=terminal]
+<HUAWEI> display mpls ldp peer
+<HUAWEI> display mpls ldp session
+<HUAWEI> display mpls ldp lsp
+<HUAWEI> display mpls lsp
+\end{lstlisting}
+
+En AR651-A se obtuvo una entrada para la FEC \texttt{20.20.20.0/30}:
+
+\begin{lstlisting}[style=terminal]
+DestAddress/Mask   In/OutLabel   NextHop      OutInterface
+20.20.20.0/30      NULL/1029     10.0.12.2    GE0/0/1
+\end{lstlisting}
+
+Esta entrada confirma que AR651-A funciona como LER de ingreso para la red
+\texttt{20.20.20.0/30}: recibe un paquete IPv4 sin etiqueta y le inserta la
+etiqueta 1029 antes de enviarlo por \texttt{GE0/0/1}. En los switches de
+tr\'ansito se realiza la sustituci\'on de etiquetas y, cerca del extremo de
+salida, puede observarse PHP mediante la etiqueta \textit{Implicit NULL}.
+
+Para comprobar el sentido inverso, en AR651-B se debe verificar una entrada
+con etiqueta de salida para la FEC \texttt{10.10.10.0/30}:
+
+\begin{lstlisting}[style=terminal]
+<AR651-B> display mpls ldp lsp
+<AR651-B> display mpls lsp
+\end{lstlisting}
+
+\subsection{Instalaci\'on y preparaci\'on de iPerf3}
+
+En las computadoras con Windows se instal\'o iPerf3 versi\'on 3.20 mediante
+\texttt{winget}:
+
+\begin{lstlisting}[style=terminal]
+PS> winget install --id ar51an.iPerf3 --version 3.20 --exact
+\end{lstlisting}
+
+Despu\'es de la instalaci\'on fue necesario cerrar y abrir PowerShell para que
+la modificaci\'on de la variable \texttt{PATH} entrara en vigor. La versi\'on se
+comprob\'o con:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 --version
+\end{lstlisting}
+
+En la computadora receptora se permitieron los puertos TCP y UDP 5201 desde
+PowerShell con privilegios de administrador:
+
+\begin{lstlisting}[style=terminal]
+PS> New-NetFirewallRule -DisplayName "iPerf3 TCP 5201" `
+      -Direction Inbound -Protocol TCP -LocalPort 5201 -Action Allow
+
+PS> New-NetFirewallRule -DisplayName "iPerf3 UDP 5201" `
+      -Direction Inbound -Protocol UDP -LocalPort 5201 -Action Allow
+\end{lstlisting}
+
+\subsection{Pruebas de rendimiento con TCP}
+
+En la computadora receptora, con direcci\'on \texttt{20.20.20.1}, se inici\'o
+el servidor:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -s
+\end{lstlisting}
+
+En la computadora generadora, con direcci\'on \texttt{10.10.10.1}, se ejecut\'o
+una prueba TCP de 120 segundos:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -c 20.20.20.1 -t 120 -i 1
+\end{lstlisting}
+
+Durante la prueba se observ\'o un rendimiento estable cercano a
+\texttt{946--948 Mbit/s}. Este resultado es coherente con la capacidad efectiva
+de un enlace Gigabit Ethernet, debido a que parte del ancho de banda se utiliza
+en las cabeceras Ethernet, MPLS, IP y TCP.
+
+La prueba TCP predeterminada es unidireccional: el cliente env\'ia los datos y
+el servidor devuelve confirmaciones TCP. Estas confirmaciones no representan
+un flujo de datos equivalente en sentido contrario. Para probar el sentido
+inverso se utiliza la opci\'on \texttt{-R}:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -R
+\end{lstlisting}
+
+Para cuatro flujos TCP simult\'aneos se puede utilizar:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -P 4
+\end{lstlisting}
+
+\subsection{Pruebas de rendimiento con UDP}
+
+A diferencia de TCP, UDP no ajusta autom\'aticamente la velocidad ni
+retransmite datagramas perdidos. La opci\'on \texttt{-b} especifica el ancho de
+banda solicitado. La prueba debe comenzar con una tasa moderada y aumentar de
+forma gradual.
+
+Prueba UDP a 500 Mbit/s:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -c 20.20.20.1 -u -b 500M -t 120 -i 1
+\end{lstlisting}
+
+Prueba UDP a 900 Mbit/s:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -c 20.20.20.1 -u -b 900M -t 120 -i 1
+\end{lstlisting}
+
+Prueba UDP en sentido inverso:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -c 20.20.20.1 -u -b 900M -t 120 -i 1 -R
+\end{lstlisting}
+
+Prueba UDP bidireccional a 400 Mbit/s por sentido:
+
+\begin{lstlisting}[style=terminal]
+PS> iperf3 -c 20.20.20.1 -u -b 400M -t 120 -i 1 --bidir
+\end{lstlisting}
+
+En los resultados UDP deben analizarse el caudal recibido, el
+\textit{jitter}, la cantidad de datagramas perdidos y el porcentaje de
+p\'erdida. Una tasa solicitada cercana al l\'imite f\'isico del enlace puede
+producir p\'erdidas aunque la red se encuentre operativa.
+
+\subsection{Criterios de aceptaci\'on de la prueba}
+
+La prueba se considera satisfactoria cuando se cumplen los siguientes
+criterios:
+
+\begin{itemize}
+    \item Las adyacencias OSPF se encuentran en estado \texttt{Full}.
+    \item Las sesiones LDP se encuentran en estado \texttt{Operational}.
+    \item AR651-A aprende la red \texttt{20.20.20.0/30} y AR651-B aprende la red
+          \texttt{10.10.10.0/30}.
+    \item Existe conectividad entre \texttt{10.10.10.1} y
+          \texttt{20.20.20.1}.
+    \item AR651-A muestra una etiqueta de salida para la FEC
+          \texttt{20.20.20.0/30}.
+    \item AR651-B muestra una etiqueta de salida para la FEC
+          \texttt{10.10.10.0/30}.
+    \item iPerf3 completa las pruebas TCP y UDP sin errores de conexi\'on.
+    \item Los resultados UDP registran el caudal, el \textit{jitter} y el
+          porcentaje de datagramas perdidos.
+\end{itemize}
+
+Con estas pruebas se demostr\'o no solamente la conectividad IP proporcionada
+por OSPF, sino tambi\'en la existencia de LSP din\'amicos para las redes de
+acceso y el transporte efectivo de tr\'afico generado con iPerf3 sobre el
+n\'ucleo MPLS.
