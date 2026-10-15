@@ -21,7 +21,7 @@ network:
 
 \end{lstlisting}
 
-Luego de esto, se procedió de igual manera configurando una ip en el puerto del router que se encuentra conectado a la Raspberry Pi, para ello se utilizó el siguiente comando:
+Luego de esto, se procedió de igual manera configurando una ip en el puerto del router que se encuentra conectado a la Raspberry Pi, siguiendo el procedimiento de conectividad entre el router y el gestor de red~\cite[sec.~1.4.2, paso~1]{huawei-gestion-snmp}. Para ello se utilizó el siguiente comando:
 \begin{lstlisting}[style=terminal]
 <Huawei>system-view
 [Huawei]interface GigabitEthernet 0/0/0
@@ -38,6 +38,14 @@ snmp-agent protocol source-interface LoopBack 0
 
 
 \section{Configuración de SNMP en el Router}
+
+La habilitación del agente, la definición de la vista MIB y la creación del
+grupo y del usuario SNMPv3 se basan en la guía de gestión de dispositivos de
+Huawei~\cite[sec.~1.4.2]{huawei-gestion-snmp}, con los parámetros adaptados al
+monitoreo de lectura desde Netdata. La referencia de comandos SNMP de
+Huawei complementa la consulta de la sintaxis y de las opciones de
+configuración~\cite{huawei_snmp_2026}.
+
 \begin{itemize}
   \item Se activa SNMP
 
@@ -106,7 +114,7 @@ El router pedira contraseña para el usuario, se ingresa la contraseña deseada 
 
 El router pedira contraseña para el usuario, se ingresa la contraseña deseada y se confirma. En este caso se utilizó la contraseña \texttt{NetPriv2026}.
 
-\item Comprobar la configuración de SNMPv3 con el siguiente comando:
+\item Comprobar la configuración de SNMPv3 con el siguiente comando, conforme a la verificación de usuarios indicada en la guía~\cite[sec.~1.5, paso~2]{huawei-gestion-snmp}:
 \begin{lstlisting}[style=terminal]
 [Router-Monitoreado]display snmp-agent usm-user
 
@@ -163,6 +171,9 @@ snmpwalk -v3 \
 
 \section{Configuración de Netdata para recibir al router}
 
+La configuración del colector utiliza un trabajo por dispositivo y los
+campos de autenticación y cifrado SNMPv3 descritos en la documentación de
+Netdata~\cite{netdata-snmp-configuracion}.
 
 \begin{itemize}
 
