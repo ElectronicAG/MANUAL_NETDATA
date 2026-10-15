@@ -1,3 +1,8 @@
+\begingroup
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{2em}
+
 \section{Topología de la red MPLS}
 
 La figura~\ref{CON1} presenta la topología de la red MPLS utilizada en el
@@ -62,12 +67,11 @@ jobs:
     update_every: 10
     timeout: 5
     options:
-      options:
-        version: 3
-        max_repetitions: 5
-        max_request_size: 1
-        timeout: 10
-        retries: 2
+      version: 3
+      max_repetitions: 5
+      max_request_size: 1
+      timeout: 10
+      retries: 2
     user:
       name: netdata-user
       level: authPriv
@@ -80,12 +84,11 @@ jobs:
     update_every: 10
     timeout: 5
     options:
-      options:
-        version: 3
-        max_repetitions: 5
-        max_request_size: 1
-        timeout: 10
-        retries: 2
+      version: 3
+      max_repetitions: 5
+      max_request_size: 1
+      timeout: 10
+      retries: 2
     user:
       name: netdata-user
       level: authPriv
@@ -98,12 +101,11 @@ jobs:
     update_every: 10
     timeout: 5
     options:
-      options:
-        version: 3
-        max_repetitions: 5
-        max_request_size: 1
-        timeout: 10
-        retries: 2
+      version: 3
+      max_repetitions: 5
+      max_request_size: 1
+      timeout: 10
+      retries: 2
     user:
       name: netdata-user
       level: authPriv
@@ -116,12 +118,11 @@ jobs:
     update_every: 10
     timeout: 5
     options:
-      options:
-        version: 3
-        max_repetitions: 5
-        max_request_size: 1
-        timeout: 10
-        retries: 2
+      version: 3
+      max_repetitions: 5
+      max_request_size: 1
+      timeout: 10
+      retries: 2
     user:
       name: netdata-user
       level: authPriv
@@ -132,17 +133,12 @@ jobs:
 \end{lstlisting}
 
 La implementación utiliza dos routers Huawei AR651 como dispositivos de
-
 borde y dos switches Huawei S6730H como dispositivos de tránsito. La
-
 configuración se divide en cuatro etapas: configuración del protocolo OSPF,
-
 creación de un LSP estático, implementación de LDP y modificación del modo
-
 de anuncio de etiquetas.
 
 Antes de ejecutar los comandos se debe comprobar el nombre real de las
-
 interfaces:
 
 \begin{lstlisting}[style=terminal]
@@ -150,11 +146,8 @@ interfaces:
 \end{lstlisting}
 
 Los puertos Ethernet de los switches S6730H deben funcionar como interfaces
-
 de capa 3. Para ello se utiliza el comando \texttt{undo portswitch}. Si el
-
 comando no está disponible o la interfaz ya trabaja en capa 3, se puede
-
 omitir.
 
 \subsection{Configuración base y OSPF}
@@ -263,7 +256,6 @@ Como se puede observar, se anuncia la red 192.168.10.0, la cual corresponde a la
 \subsubsection{Verificación de OSPF}
 
 Los siguientes comandos deben ejecutarse en los dispositivos para comprobar
-
 las adyacencias y las rutas aprendidas mediante OSPF:
 
 \begin{lstlisting}[style=terminal]
@@ -272,7 +264,6 @@ las adyacencias y las rutas aprendidas mediante OSPF:
 \end{lstlisting}
 
 Desde AR651-A se comprueba la comunicación entre las loopbacks de ambos
-
 extremos:
 
 \begin{lstlisting}[style=terminal]
@@ -280,7 +271,6 @@ extremos:
 \end{lstlisting}
 
 No se debe continuar con MPLS hasta obtener respuesta y comprobar que existe
-
 una ruta hacia \texttt{4.4.4.4/32}:
 
 \begin{lstlisting}[style=terminal]
@@ -292,19 +282,13 @@ una ruta hacia \texttt{4.4.4.4/32}:
 El plan de etiquetas empleado es el siguiente:
 
 \begin{itemize}
-
     \item AR651-A inserta la etiqueta 100.
-
     \item S6730H-C recibe la etiqueta 100 y la sustituye por la etiqueta 200.
-
     \item S6730H-D recibe la etiqueta 200 y la sustituye por la etiqueta 300.
-
     \item AR651-B recibe y elimina la etiqueta 300.
-
 \end{itemize}
 
 Esta implementación corresponde a un LSP estático convencional. El
-
 comportamiento PHP se observará posteriormente con LDP.
 
 \subsubsection{Configuración MPLS de AR651-A}
@@ -409,7 +393,6 @@ En AR651-A se apaga la interfaz conectada con S6730H-C:
 \end{lstlisting}
 
 Después de esperar aproximadamente 30 segundos se comprueba el estado del
-
 LSP:
 
 \begin{lstlisting}[style=terminal]
@@ -418,9 +401,7 @@ LSP:
 \end{lstlisting}
 
 Debido a que la topología es lineal y no existe otra ruta, el equipo puede
-
 indicar que el LSP especificado no existe. Este resultado confirma que el LSP
-
 estático no puede redirigirse automáticamente.
 
 El enlace debe restaurarse antes de continuar:
@@ -484,7 +465,6 @@ Se confirma que las entradas estáticas fueron eliminadas:
 \subsection{Configuración de LDP}
 
 La configuración global de MPLS y la habilitación de MPLS en las interfaces
-
 se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 
 \subsubsection{Configuración de LDP en AR651-A}
@@ -544,7 +524,6 @@ se conservan. Únicamente se elimina el LSP estático y se activa LDP.
 \subsubsection{Verificación de LDP}
 
 Los siguientes comandos permiten verificar las interfaces, vecinos, sesiones
-
 y etiquetas de LDP:
 
 \begin{lstlisting}[style=terminal]
@@ -557,7 +536,6 @@ y etiquetas de LDP:
 \end{lstlisting}
 
 Una sesión LDP completamente establecida debe aparecer en estado
-
 \texttt{Operational}.
 
 Desde AR651-A se comprueba el plano de datos:
@@ -602,9 +580,7 @@ Después de esperar se comprueba el LSP:
 \end{lstlisting}
 
 En la topología lineal no existe una ruta alternativa. Por esta razón, LDP
-
 solamente puede converger por otro camino si se agrega un segundo enlace
-
 físico y OSPF aprende una ruta alternativa.
 
 Finalmente se restaura la interfaz:
@@ -620,7 +596,6 @@ Finalmente se restaura la interfaz:
 \subsection{Cambio del modo de anuncio a DoD}
 
 Antes de modificar el modo de anuncio, se comprueba la configuración actual
-
 en S6730H-C:
 
 \begin{lstlisting}[style=terminal]
@@ -661,7 +636,6 @@ Para comprobar la sintaxis disponible en el equipo:
 \end{lstlisting}
 
 El cambio del modo de anuncio puede provocar el reinicio temporal de la
-
 sesión LDP. Después del cambio se verifica:
 
 \begin{lstlisting}[style=terminal]
@@ -692,7 +666,6 @@ En S6730H-D:
 \end{lstlisting}
 
 También puede restaurarse el valor predeterminado con el comando
-
 \texttt{undo}, si la versión de VRP instalada lo admite:
 
 \begin{lstlisting}[style=terminal]
@@ -703,7 +676,6 @@ También puede restaurarse el valor predeterminado con el comando
 \subsection{Comandos de diagnóstico}
 
 Los siguientes comandos pueden utilizarse en los cuatro dispositivos para
-
 identificar problemas de interfaces, direccionamiento, OSPF, MPLS y LDP:
 
 \begin{lstlisting}[style=terminal]
@@ -734,7 +706,6 @@ La configuración solamente debe guardarse cuando lo autorice el instructor:
 \subsection{Limpieza final}
 
 Los siguientes comandos eliminan la configuración almacenada y reinician el
-
 dispositivo. Solamente deben utilizarse cuando lo indique el instructor:
 
 \begin{lstlisting}[style=terminal]
@@ -743,9 +714,7 @@ dispositivo. Solamente deben utilizarse cuando lo indique el instructor:
 \end{lstlisting}
 
 En algunas versiones de VRP el segundo comando puede aparecer como
-
 \texttt{reboot-fast}. La sintaxis disponible puede comprobarse antes de
-
 ejecutarlo:
 
 \begin{lstlisting}[style=terminal]
@@ -755,9 +724,7 @@ ejecutarlo:
 \subsection{Configuración del acceso SSH}
 
 Para permitir la administración remota del router se generó un par de claves
-
 RSA, se creó un usuario local con privilegios administrativos y se habilitó
-
 el servicio STelnet de Huawei.
 
 Primero se generó el par de claves RSA utilizado por el servidor SSH:
@@ -768,19 +735,17 @@ Primero se generó el par de claves RSA utilizado por el servidor SSH:
 \end{lstlisting}
 
 Posteriormente, se creó el usuario local \texttt{samuel}, se le asignó el
-
 nivel máximo de privilegios y se habilitó el servicio SSH:
 
 \begin{lstlisting}[style=terminal]
 [AR651-A] aaa
-[AR651-A-aaa] local-user samuel password cipher samuel123
+[AR651-A-aaa] local-user samuel password cipher hola1234
 [AR651-A-aaa] local-user samuel privilege level 15
 [AR651-A-aaa] local-user samuel service-type ssh
 [AR651-A-aaa] quit
 \end{lstlisting}
 
 Las líneas VTY se configuraron para utilizar autenticación AAA y aceptar
-
 únicamente conexiones mediante SSH:
 
 \begin{lstlisting}[style=terminal]
@@ -791,7 +756,6 @@ Las líneas VTY se configuraron para utilizar autenticación AAA y aceptar
 \end{lstlisting}
 
 Finalmente, se permitió el acceso SSH mediante todas las interfaces y se
-
 habilitó el servicio STelnet:
 
 \begin{lstlisting}[style=terminal]
@@ -809,50 +773,63 @@ La configuración se verificó mediante los siguientes comandos:
 \end{lstlisting}
 
 Desde una computadora con conectividad hacia el router, el acceso se realiza
-
 con el siguiente comando:
 
 \begin{lstlisting}[style=terminal]
 ssh samuel@10.0.12.1
 \end{lstlisting}
-\section{Generaci\'on y verificaci\'on de tr\'afico sobre MPLS}
+
+\section{Generación y verificación de tráfico sobre MPLS}
+
 \label{sec:pruebas-mpls-iperf3}
 
 Una vez establecidas las sesiones LDP, se agregaron dos redes de acceso para
-generar tr\'afico de extremo a extremo. La primera computadora se conect\'o al
-router AR651-A y funcion\'o como cliente de \textit{iPerf3}; la segunda se
-conect\'o al router AR651-B y funcion\'o como servidor. De esta manera, el
-tr\'afico atraves\'o los cuatro dispositivos del n\'ucleo: AR651-A, S6730H-C,
+generar tráfico de extremo a extremo. La primera computadora se conectó al
+router AR651-A y funcionó como cliente de \textit{iPerf3}; la segunda se
+conectó al router AR651-B y funcionó como servidor. De esta manera, el
+tráfico atravesó los cuatro dispositivos del núcleo: AR651-A, S6730H-C,
 S6730H-D y AR651-B.
 
 \subsection{Direccionamiento de las redes de prueba}
 
 La tabla \ref{tab:direccionamiento-iperf3} presenta el direccionamiento
-utilizado. En ambas redes se utiliz\'o una m\'ascara de 30 bits, equivalente a
+utilizado. En ambas redes se utilizó una máscara de 30 bits, equivalente a
 \texttt{255.255.255.252}.
 
 \begin{table}[H]
+
     \centering
-    \caption{Direccionamiento para las pruebas de tr\'afico}
+
+    \caption{Direccionamiento para las pruebas de tráfico}
+
     \label{tab:direccionamiento-iperf3}
+
     \begin{tabular}{|p{3.5cm}|p{2.5cm}|p{3.1cm}|p{3.4cm}|}
+
         \hline
-        \textbf{Dispositivo} & \textbf{Interfaz} & \textbf{Direcci\'on IP} & \textbf{Puerta de enlace} \\ \hline
+
+        \textbf{Dispositivo} & \textbf{Interfaz} & \textbf{Dirección IP} & \textbf{Puerta de enlace} \\ \hline
+
         Computadora generadora & Ethernet & 10.10.10.1/30 & 10.10.10.2 \\ \hline
+
         AR651-A & GE0/0/3 & 10.10.10.2/30 & No aplica \\ \hline
+
         AR651-B & GE0/0/3 & 20.20.20.2/30 & No aplica \\ \hline
+
         Computadora receptora & Ethernet & 20.20.20.1/30 & 20.20.20.2 \\ \hline
+
     \end{tabular}
+
 \end{table}
 
 Las interfaces \texttt{GigabitEthernet0/0/3} son interfaces de acceso hacia
-las computadoras. Por esta raz\'on, no se habilit\'o MPLS ni LDP directamente en
-ellas. El etiquetado MPLS se aplic\'o en las interfaces que pertenecen al n\'ucleo
+las computadoras. Por esta razón, no se habilitó MPLS ni LDP directamente en
+ellas. El etiquetado MPLS se aplicó en las interfaces que pertenecen al núcleo
 de la red.
 
-\subsection{Configuraci\'on de la red de acceso en AR651-A}
+\subsection{Configuración de la red de acceso en AR651-A}
 
-En AR651-A se configur\'o la direcci\'on \texttt{10.10.10.2/30} y se anunci\'o
+En AR651-A se configuró la dirección \texttt{10.10.10.2/30} y se anunció
 la red mediante OSPF.
 
 \begin{lstlisting}[style=terminal]
@@ -869,10 +846,10 @@ la red mediante OSPF.
 [AR651-A] return
 \end{lstlisting}
 
-\subsection{Configuraci\'on de la red de acceso en AR651-B}
+\subsection{Configuración de la red de acceso en AR651-B}
 
-En AR651-B se configur\'o la direcci\'on \texttt{20.20.20.2/30} y tambi\'en se
-anunci\'o la red mediante OSPF.
+En AR651-B se configuró la dirección \texttt{20.20.20.2/30} y también se
+anunció la red mediante OSPF.
 
 \begin{lstlisting}[style=terminal]
 <AR651-B> system-view
@@ -888,7 +865,7 @@ anunci\'o la red mediante OSPF.
 [AR651-B] return
 \end{lstlisting}
 
-La propagaci\'on de las dos redes se verific\'o con los siguientes comandos:
+La propagación de las dos redes se verificó con los siguientes comandos:
 
 \begin{lstlisting}[style=terminal]
 <AR651-A> display ip routing-table 20.20.20.0
@@ -897,22 +874,22 @@ La propagaci\'on de las dos redes se verific\'o con los siguientes comandos:
 <AR651-B> ping -a 20.20.20.2 10.10.10.2
 \end{lstlisting}
 
-El ping originado en AR651-A obtuvo respuesta de AR651-B con una p\'erdida del
-0\,\%, lo cual confirm\'o que OSPF proporcionaba conectividad y una ruta de
+El ping originado en AR651-A obtuvo respuesta de AR651-B con una pérdida del
+0\,\%, lo cual confirmó que OSPF proporcionaba conectividad y una ruta de
 retorno entre ambos extremos.
 
-\subsection{Configuraci\'on de las computadoras}
+\subsection{Configuración de las computadoras}
 
-En la computadora generadora se configuraron los siguientes par\'ametros:
+En la computadora generadora se configuraron los siguientes parámetros:
 
 \begin{lstlisting}[style=terminal]
-Direcci\'on IPv4: 10.10.10.1
+Direccion IPv4: 10.10.10.1
 Longitud de prefijo: 30
 Puerta de enlace: 10.10.10.2
 \end{lstlisting}
 
-La configuraci\'on puede aplicarse desde PowerShell con privilegios de
-administrador. El \'indice 13 corresponde a la interfaz Ethernet utilizada en
+La configuración puede aplicarse desde PowerShell con privilegios de
+administrador. El índice 13 corresponde a la interfaz Ethernet utilizada en
 la prueba y debe sustituirse si Windows muestra un valor diferente.
 
 \begin{lstlisting}[style=terminal]
@@ -925,7 +902,7 @@ PS> New-NetIPAddress -InterfaceIndex 13 `
 En la computadora receptora se configuraron los siguientes valores:
 
 \begin{lstlisting}[style=terminal]
-Direcci\'on IPv4: 20.20.20.1
+Direccion IPv4: 20.20.20.1
 Longitud de prefijo: 30
 Puerta de enlace: 20.20.20.2
 \end{lstlisting}
@@ -937,16 +914,16 @@ PS> New-NetIPAddress -InterfaceAlias "Ethernet" `
       -DefaultGateway 20.20.20.2
 \end{lstlisting}
 
-Durante la implementaci\'on se detect\'o que Windows seleccionaba la interfaz
+Durante la implementación se detectó que Windows seleccionaba la interfaz
 virtual de ZeroTier para alcanzar la red \texttt{20.20.20.0/30}. La interfaz
-elegida por el sistema se comprob\'o con el siguiente comando:
+elegida por el sistema se comprobó con el siguiente comando:
 
 \begin{lstlisting}[style=terminal]
 PS> Find-NetRoute -RemoteIPAddress 20.20.20.2
 \end{lstlisting}
 
-Para garantizar que el tr\'afico de laboratorio utilizara la interfaz Ethernet
-y el router AR651-A, se agreg\'o una ruta m\'as espec\'ifica desde una consola de
+Para garantizar que el tráfico de laboratorio utilizara la interfaz Ethernet
+y el router AR651-A, se agregó una ruta más específica desde una consola de
 PowerShell ejecutada como administrador:
 
 \begin{lstlisting}[style=terminal]
@@ -956,9 +933,9 @@ PS> New-NetRoute -InterfaceIndex 13 `
       -RouteMetric 1
 \end{lstlisting}
 
-Despu\'es del cambio, \texttt{Find-NetRoute} mostr\'o la interfaz Ethernet, el
+Después del cambio, \texttt{Find-NetRoute} mostró la interfaz Ethernet, el
 \texttt{InterfaceIndex 13} y el siguiente salto \texttt{10.10.10.2}. La
-conectividad se valid\'o con:
+conectividad se validó con:
 
 \begin{lstlisting}[style=terminal]
 PS> ping 10.10.10.2
@@ -967,20 +944,20 @@ PS> ping 20.20.20.1
 PS> tracert -d 20.20.20.1
 \end{lstlisting}
 
-\subsection{Creaci\'on de LSP para las redes de acceso}
+\subsection{Creación de LSP para las redes de acceso}
 
 Inicialmente, la salida de \texttt{display mpls ldp lsp} mostraba LSP
-\'unicamente para las direcciones de loopback \texttt{/32}. En ese estado,
-LDP estaba operativo, pero el tr\'afico entre las computadoras se reenviaba como
-IPv4 convencional debido a que no exist\'ia una FEC para las redes de acceso.
+únicamente para las direcciones de loopback \texttt{/32}. En ese estado,
+LDP estaba operativo, pero el tráfico entre las computadoras se reenviaba como
+IPv4 convencional debido a que no existía una FEC para las redes de acceso.
 
-Para esta topolog\'ia de laboratorio se configur\'o \texttt{lsp-trigger all} en
-los cuatro dispositivos. Con ello, las rutas est\'aticas y las rutas aprendidas
-por el IGP pueden activar la creaci\'on de LSP. Este comando debe utilizarse con
-precauci\'on en redes de producci\'on porque puede aumentar la cantidad de
+Para esta topología de laboratorio se configuró \texttt{lsp-trigger all} en
+los cuatro dispositivos. Con ello, las rutas estáticas y las rutas aprendidas
+por el IGP pueden activar la creación de LSP. Este comando debe utilizarse con
+precaución en redes de producción porque puede aumentar la cantidad de
 etiquetas utilizadas.
 
-\subsubsection{Configuraci\'on en AR651-A}
+\subsubsection{Configuración en AR651-A}
 
 \begin{lstlisting}[style=terminal]
 <AR651-A> system-view
@@ -990,7 +967,7 @@ etiquetas utilizadas.
 [AR651-A] return
 \end{lstlisting}
 
-\subsubsection{Configuraci\'on en S6730H-C}
+\subsubsection{Configuración en S6730H-C}
 
 \begin{lstlisting}[style=terminal]
 <S6730H-C> system-view
@@ -1000,7 +977,7 @@ etiquetas utilizadas.
 [S6730H-C] return
 \end{lstlisting}
 
-\subsubsection{Configuraci\'on en S6730H-D}
+\subsubsection{Configuración en S6730H-D}
 
 \begin{lstlisting}[style=terminal]
 <S6730H-D> system-view
@@ -1010,7 +987,7 @@ etiquetas utilizadas.
 [S6730H-D] return
 \end{lstlisting}
 
-\subsubsection{Configuraci\'on en AR651-B}
+\subsubsection{Configuración en AR651-B}
 
 \begin{lstlisting}[style=terminal]
 <AR651-B> system-view
@@ -1031,15 +1008,15 @@ por el dispositivo:
 [HUAWEI-mpls-ldp-ipv4] lsp-trigger all
 \end{lstlisting}
 
-\subsection{Verificaci\'on del etiquetado MPLS}
+\subsection{Verificación del etiquetado MPLS}
 
 OSPF y MPLS cumplen funciones diferentes. OSPF calcula la ruta IP hacia el
 destino, mientras que LDP distribuye las etiquetas que permiten reenviar los
-paquetes a trav\'es de un LSP. Por lo tanto, la presencia de vecinos OSPF y
-sesiones LDP no era suficiente para demostrar que el tr\'afico de las
+paquetes a través de un LSP. Por lo tanto, la presencia de vecinos OSPF y
+sesiones LDP no era suficiente para demostrar que el tráfico de las
 computadoras estuviera etiquetado.
 
-La verificaci\'on se realiz\'o con:
+La verificación se realizó con:
 
 \begin{lstlisting}[style=terminal]
 <HUAWEI> display mpls ldp peer
@@ -1058,7 +1035,7 @@ DestAddress/Mask   In/OutLabel   NextHop      OutInterface
 Esta entrada confirma que AR651-A funciona como LER de ingreso para la red
 \texttt{20.20.20.0/30}: recibe un paquete IPv4 sin etiqueta y le inserta la
 etiqueta 1029 antes de enviarlo por \texttt{GE0/0/1}. En los switches de
-tr\'ansito se realiza la sustituci\'on de etiquetas y, cerca del extremo de
+tránsito se realiza la sustitución de etiquetas y, cerca del extremo de
 salida, puede observarse PHP mediante la etiqueta \textit{Implicit NULL}.
 
 Para comprobar el sentido inverso, en AR651-B se debe verificar una entrada
@@ -1069,18 +1046,18 @@ con etiqueta de salida para la FEC \texttt{10.10.10.0/30}:
 <AR651-B> display mpls lsp
 \end{lstlisting}
 
-\subsection{Instalaci\'on y preparaci\'on de iPerf3}
+\subsection{Instalación y preparación de iPerf3}
 
-En las computadoras con Windows se instal\'o iPerf3 versi\'on 3.20 mediante
+En las computadoras con Windows se instaló iPerf3 versión 3.20 mediante
 \texttt{winget}:
 
 \begin{lstlisting}[style=terminal]
 PS> winget install --id ar51an.iPerf3 --version 3.20 --exact
 \end{lstlisting}
 
-Despu\'es de la instalaci\'on fue necesario cerrar y abrir PowerShell para que
-la modificaci\'on de la variable \texttt{PATH} entrara en vigor. La versi\'on se
-comprob\'o con:
+Después de la instalación fue necesario cerrar y abrir PowerShell para que
+la modificación de la variable \texttt{PATH} entrara en vigor. La versión se
+comprobó con:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 --version
@@ -1092,42 +1069,41 @@ PowerShell con privilegios de administrador:
 \begin{lstlisting}[style=terminal]
 PS> New-NetFirewallRule -DisplayName "iPerf3 TCP 5201" `
       -Direction Inbound -Protocol TCP -LocalPort 5201 -Action Allow
-
 PS> New-NetFirewallRule -DisplayName "iPerf3 UDP 5201" `
       -Direction Inbound -Protocol UDP -LocalPort 5201 -Action Allow
 \end{lstlisting}
 
 \subsection{Pruebas de rendimiento con TCP}
 
-En la computadora receptora, con direcci\'on \texttt{20.20.20.1}, se inici\'o
+En la computadora receptora, con dirección \texttt{20.20.20.1}, se inició
 el servidor:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 -s
 \end{lstlisting}
 
-En la computadora generadora, con direcci\'on \texttt{10.10.10.1}, se ejecut\'o
+En la computadora generadora, con dirección \texttt{10.10.10.1}, se ejecutó
 una prueba TCP de 120 segundos:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 -c 20.20.20.1 -t 120 -i 1
 \end{lstlisting}
 
-Durante la prueba se observ\'o un rendimiento estable cercano a
+Durante la prueba se observó un rendimiento estable cercano a
 \texttt{946--948 Mbit/s}. Este resultado es coherente con la capacidad efectiva
 de un enlace Gigabit Ethernet, debido a que parte del ancho de banda se utiliza
 en las cabeceras Ethernet, MPLS, IP y TCP.
 
-La prueba TCP predeterminada es unidireccional: el cliente env\'ia los datos y
+La prueba TCP predeterminada es unidireccional: el cliente envía los datos y
 el servidor devuelve confirmaciones TCP. Estas confirmaciones no representan
 un flujo de datos equivalente en sentido contrario. Para probar el sentido
-inverso se utiliza la opci\'on \texttt{-R}:
+inverso se utiliza la opción \texttt{-R}:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -R
 \end{lstlisting}
 
-Para cuatro flujos TCP simult\'aneos se puede utilizar:
+Para cuatro flujos TCP simultáneos se puede utilizar:
 
 \begin{lstlisting}[style=terminal]
 PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -P 4
@@ -1135,8 +1111,8 @@ PS> iperf3 -c 20.20.20.1 -t 120 -i 1 -P 4
 
 \subsection{Pruebas de rendimiento con UDP}
 
-A diferencia de TCP, UDP no ajusta autom\'aticamente la velocidad ni
-retransmite datagramas perdidos. La opci\'on \texttt{-b} especifica el ancho de
+A diferencia de TCP, UDP no ajusta automáticamente la velocidad ni
+retransmite datagramas perdidos. La opción \texttt{-b} especifica el ancho de
 banda solicitado. La prueba debe comenzar con una tasa moderada y aumentar de
 forma gradual.
 
@@ -1166,10 +1142,10 @@ PS> iperf3 -c 20.20.20.1 -u -b 400M -t 120 -i 1 --bidir
 
 En los resultados UDP deben analizarse el caudal recibido, el
 \textit{jitter}, la cantidad de datagramas perdidos y el porcentaje de
-p\'erdida. Una tasa solicitada cercana al l\'imite f\'isico del enlace puede
-producir p\'erdidas aunque la red se encuentre operativa.
+pérdida. Una tasa solicitada cercana al límite físico del enlace puede
+producir pérdidas aunque la red se encuentre operativa.
 
-\subsection{Criterios de aceptaci\'on de la prueba}
+\subsection{Criterios de aceptación de la prueba}
 
 La prueba se considera satisfactoria cuando se cumplen los siguientes
 criterios:
@@ -1185,12 +1161,15 @@ criterios:
           \texttt{20.20.20.0/30}.
     \item AR651-B muestra una etiqueta de salida para la FEC
           \texttt{10.10.10.0/30}.
-    \item iPerf3 completa las pruebas TCP y UDP sin errores de conexi\'on.
+    \item iPerf3 completa las pruebas TCP y UDP sin errores de conexión.
     \item Los resultados UDP registran el caudal, el \textit{jitter} y el
           porcentaje de datagramas perdidos.
 \end{itemize}
 
-Con estas pruebas se demostr\'o no solamente la conectividad IP proporcionada
-por OSPF, sino tambi\'en la existencia de LSP din\'amicos para las redes de
-acceso y el transporte efectivo de tr\'afico generado con iPerf3 sobre el
-n\'ucleo MPLS.
+Con estas pruebas se demostró no solamente la conectividad IP proporcionada
+por OSPF, sino también la existencia de LSP dinámicos para las redes de
+acceso y el transporte efectivo de tráfico generado con iPerf3 sobre el
+núcleo MPLS.
+
+\endgroup
+
