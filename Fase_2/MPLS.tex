@@ -25,7 +25,7 @@ monitoreo se incorporan a esa base para este proyecto.
 
 \end{figure}
 
-Para que el servidor de monitoreo, en este caso la Raspberry Pi, pueda capturar y analizar el tráfico de la red, es necesario que pueda tener comunicación con todos los dispositivos de la red, para esto se configuró rutas estáicas en la Raspberry Pi, de tal manera que pueda alcanzar a todos los dispositivos de la red MPLS. Para eso, se modificó el archivo: sudo nano /etc/netplan/50-cloud-init.yaml 
+Para que el servidor de monitoreo, en este caso la Raspberry Pi, pueda capturar y analizar el tráfico de la red, es necesario que pueda tener comunicación con todos los dispositivos de la red, para esto se configuró rutas estáticas en la Raspberry Pi, de tal manera que pueda alcanzar a todos los dispositivos de la red MPLS. Para eso, se modificó el archivo: sudo nano /etc/netplan/50-cloud-init.yaml 
 
 Contenido del archivo:
 
@@ -60,16 +60,20 @@ Ahora, se debe de configurar netdata, para esto, se modifica el archivo respecti
 
 \begin{lstlisting}[style=terminal]
 jobs:
-  - name: ar651_a
+  - name: AR651-A
     hostname: 1.1.1.1
     update_every: 10
-    timeout: 5
+    create_vnode: true
+    vnode_device_down_threshold: 3
+
     options:
       version: 3
-      max_repetitions: 5
-      max_request_size: 1
+      port: 161
       timeout: 10
-      retries: 2
+      retries: 1
+      max_request_size: 20
+      max_repetitions: 10
+
     user:
       name: netdata-user
       level: authPriv
@@ -78,17 +82,24 @@ jobs:
       priv_proto: aes
       priv_key: "NetPriv2026"
 
-  - name: s6730h_c
+    manual_profiles:
+      - huawei
+
+  - name: S6730H-C
     hostname: 2.2.2.2
     update_every: 10
-    timeout: 5
+    create_vnode: true
+    vnode_device_down_threshold: 3
+
     options:
       version: 3
-      max_repetitions: 5
-      max_request_size: 1
+      port: 161
       timeout: 10
-      retries: 2      
-      user:
+      retries: 1
+      max_request_size: 20
+      max_repetitions: 10
+
+    user:
       name: netdata-user
       level: authPriv
       auth_proto: sha256
@@ -96,16 +107,23 @@ jobs:
       priv_proto: aes
       priv_key: "NetPriv2026"
 
-  - name: s6730h_d
+    manual_profiles:
+      - huawei
+
+  - name: S6730H-D
     hostname: 3.3.3.3
     update_every: 10
-    timeout: 5
+    create_vnode: true
+    vnode_device_down_threshold: 3
+
     options:
       version: 3
-      max_repetitions: 5
-      max_request_size: 1
+      port: 161
       timeout: 10
-      retries: 2
+      retries: 1
+      max_request_size: 20
+      max_repetitions: 10
+
     user:
       name: netdata-user
       level: authPriv
@@ -114,16 +132,23 @@ jobs:
       priv_proto: aes
       priv_key: "NetPriv2026"
 
-  - name: ar651_b
+    manual_profiles:
+      - huawei
+
+  - name: AR651-B
     hostname: 4.4.4.4
     update_every: 10
-    timeout: 5
+    create_vnode: true
+    vnode_device_down_threshold: 3
+
     options:
       version: 3
-      max_repetitions: 5
-      max_request_size: 1
+      port: 161
       timeout: 10
-      retries: 2
+      retries: 1
+      max_request_size: 20
+      max_repetitions: 10
+
     user:
       name: netdata-user
       level: authPriv
@@ -131,6 +156,10 @@ jobs:
       auth_key: "NetAuth2026"
       priv_proto: aes
       priv_key: "NetPriv2026"
+
+    manual_profiles:
+      - huawei
+
 \end{lstlisting}
 
 La implementación utiliza dos routers Huawei AR651 como dispositivos de

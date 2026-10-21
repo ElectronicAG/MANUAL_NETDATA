@@ -5,7 +5,7 @@ Para la creación de dashboards en NetData, se pueden seguir los siguientes paso
 \begin{itemize}
     \item Acceder a la interfaz web de NetData a través del navegador, utilizando la dirección IP del servidor donde está instalado NetData y el puerto correspondiente (por defecto es el puerto 19999). O ingresar a NetData cloud.
     \item Navegar a la sección de Dashboards o Tableros en la interfaz de NetData.
-    \item Seleccionar la opción de "Crear nuevo dashboard" o "Agregar tablero" para iniciar el proceso de creación.
+    \item Seleccionar la opción deCrear nuevo dashboard o Agregar tablero para iniciar el proceso de creación.
 
 
 \begin{figure}[H]
@@ -31,15 +31,505 @@ En este caso se le colocó de nombre: Dashboard\_1
 \item Se seleccionan los dispositivos que se desean monitorear en el dashboard, como servidores, routers, switches u otros dispositivos de red. Se pueden agregar múltiples dispositivos al mismo dashboard para tener una visión completa del estado de la red.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale= 0.7]{Pictures/DAS3.png}
+    \includegraphics[scale= 0.84]{Pictures/DAS3.png}
     \caption{Dispositivos seleccionados para el Dashboard de NetData}
+
+\end{figure}
+
+\item Luego de guardar los cambios, ya se puede acceder al dashboard creado y visualizar los datos en tiempo real. Se pueden personalizar los gráficos, agregar widgets adicionales y configurar alertas según las necesidades del usuario.
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.5]{Pictures/DAS4.png}
+    \caption{Dashboard creado en NetData}
+
+\end{figure}
+
+\section{Editar Dashboards en NetData}
+
+Para editar el tablero correspondiente, se debe de ingresar al dashboard y dar clic en el botón de edit. Luego de esto, se puede observar que aparece una barra con opciones a la izquierda, ahi se puede colocar diferentes bloques de funcionamiento.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.45]{Pictures/DAS5.png}
+    \caption{Opciones de bloques para colocar en el Dashboard}
+
+\end{figure}
+
+
+\begin{itemize}
+    \item En este caso, se desean colocar ciertos datos de los dispositivos, como tráfico, carga de CPU, entre otros, para esto se ingresa al bloque de métricas, se selecciona el dispositivo deseado y se selecciona de las categorías y subcategorías que métrica colocar.
+    
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.6]{Pictures/DAS6.png}
+    \caption{Colocación de datos en el dashboard}
+\end{figure}
+\end{itemize}
+
+
+\section{Configuración de una alerta de latencia para los dispositivos SNMP}
+
+Una vez comprobada la recolección de métricas de los cuatro dispositivos Huawei, se configuró una alerta personalizada para supervisar la latencia de comunicación. Netdata obtiene esta información mediante las pruebas ICMP realizadas por el recolector SNMP.
+
+Los cuatro dispositivos utilizan el contexto de métricas:
+
+\begin{lstlisting}[style=terminal]
+snmp.device_ping_rtt
+\end{lstlisting}
+
+Este contexto contiene las dimensiones \texttt{min}, \texttt{max} y \texttt{avg}, correspondientes a la latencia mínima, máxima y promedio. Para la alerta se utilizó la dimensión \texttt{avg}.
+
+Primero, se creó el directorio destinado a las configuraciones personalizadas de salud, en caso de que este no existiera:
+
+\begin{lstlisting}[style=terminal]
+sudo mkdir -p /etc/netdata/health.d
+\end{lstlisting}
+
+Posteriormente, se creó el archivo de configuración de alertas:
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/health.d/snmp_custom.conf
+\end{lstlisting}
+
+Dentro del archivo se agregó la siguiente plantilla:
+
+\begin{lstlisting}[style=terminal]
+# Alerta personalizada de latencia SNMP
+
+template: snmp_high_latency
+      on: snmp.device_ping_rtt
+   class: Latency
+    type: Network
+component: SNMP
+   lookup: average -1m of avg
+    every: 30s
+    units: ms
+     warn: $this > 100
+     crit: $this > 250
+  summary: Latencia elevada hacia ${host}
+     info: La latencia promedio del dispositivo supero los limites configurados.
+       to: sysadmin
+\end{lstlisting}
+
+La alerta calcula el promedio de la dimensión \texttt{avg} durante el último minuto y evalúa la condición cada 30 segundos. Los límites configurados fueron los siguientes:
+
+\begin{itemize}
+    \item Estado normal: latencia igual o menor que 100 ms.
+    \item Advertencia (\texttt{WARNING}): latencia mayor que 100 ms.
+    \item Estado crítico (\texttt{CRITICAL}): latencia mayor que 250 ms.
+\end{itemize}
+
+Después de guardar el archivo, se recargó el sistema de alertas de Netdata sin reiniciar completamente el servicio:
+
+\begin{lstlisting}[style=terminal]
+sudo netdatacli reload-health
+\end{lstlisting}
+
+Para comprobar que la plantilla fue aplicada a los cuatro dispositivos, se ejecutó la siguiente consulta:
+
+\begin{lstlisting}[style=terminal]
+for nodo in AR651-A S6730H-C S6730H-D AR651-B; do
+  echo "===== $nodo ====="
+  curl -s 
+  "http://127.0.0.1:19999/host/$nodo/api/v1/alarms?all" 
+  | grep -A8 -B2 'snmp_high_latency'
+done
+\end{lstlisting}
+
+La plantilla generó automáticamente una instancia de la alerta para cada dispositivo debido a que todos comparten el contexto \texttt{snmp.device\_ping\_rtt}. Mientras la latencia permanece dentro de los límites establecidos, la alerta presenta el estado \texttt{CLEAR}.
+
+Finalmente, se realizó una prueba controlada modificando temporalmente los límites:
+
+\begin{lstlisting}[style=terminal]
+warn: $this > 1
+crit: $this > 5
+\end{lstlisting}
+
+Después de recargar nuevamente las alertas, Netdata detectó que la latencia superaba el límite crítico y mostró el estado \texttt{CRITICAL} en Netdata Cloud. Esto permitió comprobar que la plantilla funcionaba correctamente. Al finalizar la prueba, se restauraron los valores de 100 ms y 250 ms y se aplicó nuevamente la configuración:
+
+\begin{lstlisting}[style=terminal]
+sudo netdatacli reload-health
+\end{lstlisting}
+
+De esta forma, se implementó una única plantilla capaz de supervisar automáticamente la latencia de los cuatro dispositivos Huawei, evitando crear una alerta independiente para cada equipo.
+
+
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.4]{Pictures/DAS7.png}
+    \caption{Alertas generadas de ICMP elevado.}
+\end{figure}
+
+\end{itemize}
+
+
+\section{Configuración de alertas por fallo en la recolección SNMP}
+
+Además de la supervisión de latencia, se implementaron alertas para detectar cuando Netdata deja de recibir métricas SNMP de cualquiera de los cuatro dispositivos Huawei. Esta condición puede producirse por el apagado de un equipo, una interrupción en la red, credenciales SNMP incorrectas o una falla del servicio SNMP.
+
+Netdata genera una gráfica de estado para cada trabajo configurado en el archivo \texttt{snmp.conf}. Para identificar estas gráficas se ejecutó el siguiente script:
+
+\begin{lstlisting}[style=terminal]
+python3 - <<'PY'
+import json
+import urllib.request
+
+url = "http://127.0.0.1:19999/api/v1/charts"
+
+with urllib.request.urlopen(url) as response:
+    charts = json.load(response).get("charts", {})
+
+for chart in charts.values():
+    text = " ".join([
+        chart.get("id", ""),
+        chart.get("context", ""),
+        chart.get("title", "")
+    ]).lower()
+
+    if "snmp" in text and "collection_status" in text:
+        print(
+            "ID:", chart.get("id"),
+            "| CONTEXT:", chart.get("context"),
+            "| DIMENSIONS:",
+            list(chart.get("dimensions", {}).keys())
+        )
+PY
+\end{lstlisting}
+
+La consulta permitió identificar las siguientes gráficas:
+
+\begin{itemize}
+    \item \texttt{netdata.go\_d\_snmp\_AR651-A\_data\_collection\_status}
+    \item \texttt{netdata.go\_d\_snmp\_S6730H-C\_data\_collection\_status}
+    \item \texttt{netdata.go\_d\_snmp\_S6730H-D\_data\_collection\_status}
+    \item \texttt{netdata.go\_d\_snmp\_AR651-B\_data\_collection\_status}
+\end{itemize}
+
+Todas las gráficas utilizan el contexto \texttt{netdata.plugin\_data\_collection\_status} y contienen las dimensiones \texttt{success} y \texttt{failed}. Un valor igual a cero en la dimensión \texttt{failed} indica que la consulta se realizó correctamente, mientras que un valor mayor que cero indica una falla.
+
+Debido a que este contexto también es utilizado por otros recolectores de Netdata, se crearon alarmas específicas para cada trabajo SNMP. De esta manera se evita que la alerta se aplique accidentalmente a otros plugins.
+
+Se abrió el archivo de alertas personalizadas:
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/health.d/snmp_custom.conf
+\end{lstlisting}
+
+A continuación, se agregaron las alarmas correspondientes a los cuatro dispositivos:
+
+\begin{lstlisting}[style=terminal]
+# ============================================================
+# Fallo de recoleccion SNMP
+# ============================================================
+
+alarm: snmp_collection_failure_AR651_A
+   on: netdata.go_d_snmp_AR651-A_data_collection_status
+class: Errors
+ type: Network
+component: SNMP
+lookup: average -1m of failed
+every: 30s
+units: status
+ warn: $this > 0
+ crit: $this >= 0.8
+summary: Fallo de recoleccion SNMP en AR651-A
+ info: Netdata no recibe correctamente las metricas SNMP de AR651-A.
+   to: sysadmin
+
+
+alarm: snmp_collection_failure_S6730H_C
+   on: netdata.go_d_snmp_S6730H-C_data_collection_status
+class: Errors
+ type: Network
+component: SNMP
+lookup: average -1m of failed
+every: 30s
+units: status
+ warn: $this > 0
+ crit: $this >= 0.8
+summary: Fallo de recoleccion SNMP en S6730H-C
+ info: Netdata no recibe correctamente las metricas SNMP de S6730H-C.
+   to: sysadmin
+
+
+alarm: snmp_collection_failure_S6730H_D
+   on: netdata.go_d_snmp_S6730H-D_data_collection_status
+class: Errors
+ type: Network
+component: SNMP
+lookup: average -1m of failed
+every: 30s
+units: status
+ warn: $this > 0
+ crit: $this >= 0.8
+summary: Fallo de recoleccion SNMP en S6730H-D
+ info: Netdata no recibe correctamente las metricas SNMP de S6730H-D.
+   to: sysadmin
+
+
+alarm: snmp_collection_failure_AR651_B
+   on: netdata.go_d_snmp_AR651-B_data_collection_status
+class: Errors
+ type: Network
+component: SNMP
+lookup: average -1m of failed
+every: 30s
+units: status
+ warn: $this > 0
+ crit: $this >= 0.8
+summary: Fallo de recoleccion SNMP en AR651-B
+ info: Netdata no recibe correctamente las metricas SNMP de AR651-B.
+   to: sysadmin
+\end{lstlisting}
+
+Cada alarma calcula el promedio de la dimensión \texttt{failed} durante el último minuto y evalúa su condición cada 30 segundos. La interpretación de los estados es la siguiente:
+
+\begin{itemize}
+    \item \texttt{CLEAR}: la recolección SNMP funciona correctamente.
+    \item \texttt{WARNING}: se detectó al menos un fallo durante el último minuto.
+    \item \texttt{CRITICAL}: la recolección falló de manera continua durante la mayor parte del último minuto.
+\end{itemize}
+
+Después de guardar el archivo, se recargó el sistema de alertas sin reiniciar completamente el agente:
+
+\begin{lstlisting}[style=terminal]
+sudo netdatacli reload-health
+\end{lstlisting}
+
+La existencia de las alarmas se comprobó mediante la API local de Netdata:
+
+\begin{lstlisting}[style=terminal]
+curl -s 
+'http://127.0.0.1:19999/api/v1/alarms?all' 
+| grep -A12 -B2 'snmp_collection_failure'
+\end{lstlisting}
+
+También se agregó alerta por pérdidas de ICMP:
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/go.d/ping.conf
+\end{lstlisting}
+
+
+\begin{lstlisting}[style=terminal]
+update_every: 10 
+autodetection_retry: 0
+
+jobs:
+  - name: dispositivos_huawei
+    privileged: yes
+    packets: 3
+    hosts:
+      - AR651-A
+      - S6730H-C
+      - S6730H-D
+      - AR651-B
+\end{lstlisting}
+
+
+
+\subsection{Prueba de funcionamiento}
+
+Para verificar el funcionamiento de las alarmas se apagó el router \texttt{AR651-B} dentro del entorno de simulación. Como consecuencia, la Raspberry Pi dejó de recibir respuestas SNMP desde la dirección \texttt{4.4.4.4}.
+
+Inicialmente, Netdata generó una advertencia debido a los primeros intentos fallidos de recolección. Al mantenerse el equipo apagado y continuar los fallos durante el periodo de evaluación, la alarma personalizada cambió al estado \texttt{CRITICAL}.
+
+Además de la alarma crítica de recolección SNMP, Netdata presentó una advertencia relacionada con la pérdida de comunicación con el dispositivo. Esto permitió observar que las alertas pueden representar diferentes niveles o causas de una misma incidencia.
+
+La prueba confirmó que el sistema puede detectar la pérdida de conectividad con un dispositivo aun cuando la Raspberry Pi y el agente de Netdata continúan funcionando correctamente. Al encender nuevamente el router y restablecerse las consultas SNMP, la alarma regresó automáticamente al estado \texttt{CLEAR}.
+
+Con esta configuración, el sistema supervisa individualmente los cuatro dispositivos y permite identificar cuál equipo dejó de responder, facilitando la detección y localización de fallas dentro de la red MPLS.
+
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.47]{Pictures/DAS8.png}
+    \caption{Alerta generada por pérdida de comunicación con SNMP.}
 
 \end{figure}
 
 
 
 
+\section{Configuración de la topología SNMP en Netdata}
 
+Además de recopilar las métricas individuales de los routers y switches, se configuró el módulo de topología SNMP de Netdata. Este módulo permite representar gráficamente los dispositivos administrados y los enlaces existentes entre ellos.
 
+La identificación de los enlaces se realizó mediante LLDP (\textit{Link Layer Discovery Protocol}). Los dispositivos Huawei tenían habilitado este protocolo, por lo que fue posible consultar mediante SNMP la información de sus interfaces y vecinos.
 
+\subsection{Activación del recolector de topología}
+
+Se creó el archivo de configuración del recolector de topología:
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/go.d/snmp_topology.conf
+\end{lstlisting}
+
+Dentro del archivo se agregó la siguiente configuración:
+
+\begin{lstlisting}[style=terminal]
+jobs:
+  - name: snmp_topology
+    update_every: 30
+    refresh_every: 1m
+\end{lstlisting}
+
+El parámetro \texttt{update\_every} establece el intervalo de actualización del recolector, mientras que \texttt{refresh\_every} indica cada cuánto tiempo Netdata debe volver a descubrir los dispositivos y enlaces de la topología.
+
+\subsection{Creación del directorio de perfiles personalizados}
+
+Los perfiles instalados por Netdata se encuentran en el directorio \texttt{/usr/lib/netdata}. Estos archivos no se modificaron directamente, debido a que podrían ser reemplazados durante una actualización del programa.
+
+En su lugar, se creó el directorio destinado a los perfiles personalizados:
+
+\begin{lstlisting}[style=terminal]
+sudo mkdir -p /etc/netdata/go.d/snmp.profiles
+\end{lstlisting}
+
+\subsection{Creación del perfil genérico personalizado}
+
+Los dispositivos Huawei coincidían tanto con el perfil específico de Huawei como con el perfil genérico de Netdata. Para evitar que ambos perfiles procesaran nuevamente la misma información básica del dispositivo, se creó una versión personalizada del perfil genérico.
+
+El archivo se creó mediante:
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/go.d/snmp.profiles/generic-device.yaml
+\end{lstlisting}
+
+Se agregó el siguiente contenido:
+
+\begin{lstlisting}[style=terminal]
+extends:
+  - _std-if-mib.yaml
+  - _std-ip-mib.yaml
+  - _std-tcp-mib.yaml
+  - _std-udp-mib.yaml
+  - _std-ospf-mib.yaml
+  - _std-host-resources-mib.yaml
+  - _std-topology-ip-mib.yaml
+
+selector:
+  - sysobjectid:
+      include:
+        - 1.3.6.1.4.*
+\end{lstlisting}
+
+Este perfil conserva la recopilación genérica de interfaces, tráfico, protocolos IP, OSPF y topología de capa 3. La información básica de identificación continúa siendo proporcionada por el perfil específico de Huawei.
+
+\subsection{Creación del perfil de topología para Huawei}
+
+Se creó un segundo perfil para incorporar las tablas de interfaces, direcciones IP y vecinos LLDP de los dispositivos Huawei:
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/go.d/snmp.profiles/huawei-topology.yaml
+\end{lstlisting}
+
+El contenido utilizado fue el siguiente:
+
+\begin{lstlisting}[style=terminal]
+extends:
+  - _std-topology-interface-mib.yaml
+  - _std-topology-ip-mib.yaml
+  - _std-topology-lldp-mib.yaml
+
+selector:
+  - sysobjectid:
+      include:
+        - 1.3.6.1.4.1.2011.*
+\end{lstlisting}
+
+El identificador empresarial SNMP de Huawei es \texttt{1.3.6.1.4.1.2011}. Por esta razón, el selector aplica el perfil a los routers y switches Huawei detectados por Netdata.
+
+Los perfiles heredados cumplen las siguientes funciones:
+
+\begin{itemize}
+    \item \texttt{\_std-topology-interface-mib.yaml}: obtiene la información de las interfaces.
+    \item \texttt{\_std-topology-ip-mib.yaml}: relaciona las direcciones IP con las interfaces.
+    \item \texttt{\_std-topology-lldp-mib.yaml}: obtiene los vecinos y enlaces descubiertos mediante LLDP.
 \end{itemize}
+
+\subsection{Asignación de propietarios y permisos}
+
+El directorio y los perfiles personalizados se asignaron al usuario \texttt{root} y al grupo \texttt{netdata}:
+
+\begin{lstlisting}[style=terminal]
+sudo chown -R root:netdata \
+/etc/netdata/go.d/snmp.profiles
+
+sudo chmod 750 \
+/etc/netdata/go.d/snmp.profiles
+\end{lstlisting}
+
+Posteriormente, se establecieron permisos de lectura para el servicio de Netdata:
+
+\begin{lstlisting}[style=terminal]
+sudo chmod 640 \
+/etc/netdata/go.d/snmp.profiles/generic-device.yaml \
+/etc/netdata/go.d/snmp.profiles/huawei-topology.yaml
+\end{lstlisting}
+
+El permiso \texttt{640} permite que el propietario pueda leer y modificar los archivos, mientras que el grupo \texttt{netdata} únicamente puede leerlos.
+
+\subsection{Resolución local de los nombres de los dispositivos}
+
+La dirección \texttt{1.1.1.1}, utilizada como dirección de administración del router AR651-A, corresponde también a una dirección pública real. Su resolución DNS inversa devuelve el nombre \texttt{one.one.one.one}. Como consecuencia, Netdata utilizaba dicho nombre para identificar el router en la topología.
+
+Para establecer localmente los nombres correctos de todos los dispositivos, se modificó el archivo \texttt{/etc/hosts}:
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/hosts
+\end{lstlisting}
+
+Se agregaron las siguientes entradas:
+
+\begin{lstlisting}[style=terminal]
+1.1.1.1    AR651-A
+2.2.2.2    S6730H-C
+3.3.3.3    S6730H-D
+4.4.4.4    AR651-B
+\end{lstlisting}
+
+Estas entradas permiten que la Raspberry Pi asocie cada dirección de administración con el nombre correspondiente del dispositivo. La resolución local tiene prioridad sobre la consulta DNS externa, evitando que el router AR651-A aparezca como \texttt{one.one.one.one}.
+
+La resolución del nombre se comprobó con:
+
+\begin{lstlisting}[style=terminal]
+getent hosts 1.1.1.1
+\end{lstlisting}
+
+El resultado esperado fue:
+
+\begin{lstlisting}[style=terminal]
+1.1.1.1    AR651-A
+\end{lstlisting}
+
+\subsection{Aplicación y verificación de la configuración}
+
+Después de crear los perfiles y configurar la resolución local de nombres, se reinició el servicio de Netdata:
+
+\begin{lstlisting}[style=terminal]
+sudo systemctl restart netdata
+\end{lstlisting}
+
+El funcionamiento del recolector de topología se verificó mediante el registro del servicio:
+
+\begin{lstlisting}[style=terminal]
+sudo journalctl --namespace netdata \
+--since "5 minutes ago" --no-pager |
+grep -i 'snmp_topology'
+\end{lstlisting}
+
+Finalmente, se accedió en la interfaz de Netdata a la sección \textit{Topology}, seleccionando posteriormente la topología SNMP.
+
+Como resultado, Netdata mostró gráficamente los cuatro dispositivos Huawei y los enlaces existentes entre ellos. La representación corresponde con la topología implementada en el laboratorio y utiliza la información de vecinos LLDP obtenida mediante SNMPv3.
+
+
+
+
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.4]{Pictures/DAS9.png}
+    \caption{Topología SNMP.}
+\end{figure}
