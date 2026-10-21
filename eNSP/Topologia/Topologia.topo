@@ -36,7 +36,7 @@
                 <interface sztype="Ethernet" interfacename="GE" count="24" />
             </slot>
         </dev>
-        <dev id="9023931E-AC74-4092-9424-F686D68A2F1B" name="AR2" poe="0" model="AR2220" settings="" system_mac="00-E0-FC-FC-7C-29" com_port="2001" bootmode="0" cx="684.000000" cy="190.000000" edit_left="711" edit_top="244">
+        <dev id="9023931E-AC74-4092-9424-F686D68A2F1B" name="AR2" poe="0" model="AR2220" settings="" system_mac="00-E0-FC-FC-7C-29" com_port="2001" bootmode="0" cx="684.000000" cy="189.000000" edit_left="711" edit_top="243">
             <slot number="slot17" isMainBoard="1">
                 <interface sztype="Ethernet" interfacename="GE" count="1" />
                 <interface sztype="Ethernet" interfacename="GE" count="2" />
@@ -48,7 +48,7 @@
             <interfacePair lineName="Copper" srcIndex="0" srcBoundRectIsMoved="0" srcBoundRect_X="508.189117" srcBoundRect_Y="131.359756" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="509.532013" tarBoundRect_Y="170.841187" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
         <line srcDeviceID="922F3F8E-4493-41c6-838E-B9EBB0603D5E" destDeviceID="9023931E-AC74-4092-9424-F686D68A2F1B">
-            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="711.781921" srcBoundRect_Y="371.816772" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="1" tarBoundRectIsMoved="0" tarBoundRect_X="711.218079" tarBoundRect_Y="260.183228" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="711.783020" srcBoundRect_Y="371.816772" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="1" tarBoundRectIsMoved="0" tarBoundRect_X="711.216980" tarBoundRect_Y="259.183228" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
         <line srcDeviceID="901AFDA4-B867-4ea4-A491-9A9E84A78C7A" destDeviceID="922F3F8E-4493-41c6-838E-B9EBB0603D5E">
             <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="556.183228" srcBoundRect_Y="415.782990" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="668.816772" tarBoundRect_Y="415.217010" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
@@ -60,7 +60,7 @@
             <interfacePair lineName="Copper" srcIndex="2" srcBoundRectIsMoved="0" srcBoundRect_X="467.932495" srcBoundRect_Y="217.166733" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="418.067505" tarBoundRect_Y="220.833267" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
         <line srcDeviceID="9023931E-AC74-4092-9424-F686D68A2F1B" destDeviceID="C4A42988-8089-4bf8-8738-8120C42E74EF">
-            <interfacePair lineName="Copper" srcIndex="2" srcBoundRectIsMoved="0" srcBoundRect_X="754.182617" srcBoundRect_Y="216.684799" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="804.817383" tarBoundRect_Y="216.315201" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+            <interfacePair lineName="Copper" srcIndex="2" srcBoundRectIsMoved="0" srcBoundRect_X="754.183777" srcBoundRect_Y="216.000000" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="804.816223" tarBoundRect_Y="216.000000" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
     </lines>
     <shapes />

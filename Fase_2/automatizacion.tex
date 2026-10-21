@@ -5,7 +5,7 @@ Para la creación de dashboards en NetData, se pueden seguir los siguientes paso
 \begin{itemize}
     \item Acceder a la interfaz web de NetData a través del navegador, utilizando la dirección IP del servidor donde está instalado NetData y el puerto correspondiente (por defecto es el puerto 19999). O ingresar a NetData cloud.
     \item Navegar a la sección de Dashboards o Tableros en la interfaz de NetData.
-    \item Seleccionar la opción deCrear nuevo dashboard o Agregar tablero para iniciar el proceso de creación.
+    \item Seleccionar la opción deCrear nuevo dashboard o Agregar tablero para iniciar el proceso de creación. \cite{netdata1}
 
 
 \begin{figure}[H]
@@ -136,7 +136,7 @@ for nodo in AR651-A S6730H-C S6730H-D AR651-B; do
 done
 \end{lstlisting}
 
-La plantilla generó automáticamente una instancia de la alerta para cada dispositivo debido a que todos comparten el contexto \texttt{snmp.device\_ping\_rtt}. Mientras la latencia permanece dentro de los límites establecidos, la alerta presenta el estado \texttt{CLEAR}.
+La plantilla generó automáticamente una instancia de la alerta para cada dispositivo debido a que todos comparten el contexto \texttt{snmp.device\_ping\_rtt}. Mientras la latencia permanece dentro de los límites establecidos, la alerta presenta el estado \texttt{CLEAR}. \cite{netdata2}
 
 Finalmente, se realizó una prueba controlada modificando temporalmente los límites:
 
@@ -166,7 +166,7 @@ De esta forma, se implementó una única plantilla capaz de supervisar automáti
 
 \section{Configuración de alertas por fallo en la recolección SNMP}
 
-Además de la supervisión de latencia, se implementaron alertas para detectar cuando Netdata deja de recibir métricas SNMP de cualquiera de los cuatro dispositivos Huawei. Esta condición puede producirse por el apagado de un equipo, una interrupción en la red, credenciales SNMP incorrectas o una falla del servicio SNMP.
+Además de la supervisión de latencia, se implementaron alertas para detectar cuando Netdata deja de recibir métricas SNMP de cualquiera de los cuatro dispositivos Huawei. Esta condición puede producirse por el apagado de un equipo, una interrupción en la red, credenciales SNMP incorrectas o una falla del servicio SNMP. \cite{netdata3}
 
 Netdata genera una gráfica de estado para cada trabajo configurado en el archivo \texttt{snmp.conf}. Para identificar estas gráficas se ejecutó el siguiente script:
 
@@ -356,7 +356,7 @@ Con esta configuración, el sistema supervisa individualmente los cuatro disposi
 
 Además de recopilar las métricas individuales de los routers y switches, se configuró el módulo de topología SNMP de Netdata. Este módulo permite representar gráficamente los dispositivos administrados y los enlaces existentes entre ellos.
 
-La identificación de los enlaces se realizó mediante LLDP (\textit{Link Layer Discovery Protocol}). Los dispositivos Huawei tenían habilitado este protocolo, por lo que fue posible consultar mediante SNMP la información de sus interfaces y vecinos.
+La identificación de los enlaces se realizó mediante LLDP (\textit{Link Layer Discovery Protocol}). Los dispositivos Huawei tenían habilitado este protocolo, por lo que fue posible consultar mediante SNMP la información de sus interfaces y vecinos. \cite{netdata4}
 
 \subsection{Activación del recolector de topología}
 
