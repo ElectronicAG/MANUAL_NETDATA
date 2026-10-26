@@ -20,26 +20,26 @@
                 <interface sztype="Ethernet" interfacename="Ethernet" count="1" />
             </slot>
         </dev>
+        <dev id="9023931E-AC74-4092-9424-F686D68A2F1B" name="AR2" poe="0" model="AR2220" settings="" system_mac="00-E0-FC-FC-7C-29" com_port="2001" bootmode="0" cx="684.000000" cy="189.000000" edit_left="711" edit_top="243">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="1" />
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
+            </slot>
+        </dev>
+        <dev id="901AFDA4-B867-4ea4-A491-9A9E84A78C7A" name="LSW1" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-DE-17-74" com_port="2002" bootmode="0" cx="485.000000" cy="389.000000" edit_left="512" edit_top="443">
+            <slot number="slot17" isMainBoard="1">
+                <interface sztype="Ethernet" interfacename="GE" count="24" />
+            </slot>
+        </dev>
         <dev id="85357491-D574-4c2b-AD1D-E31F0FD29B64" name="AR1" poe="0" model="AR2220" settings="" system_mac="00-E0-FC-44-63-8F" com_port="2000" bootmode="0" cx="484.000000" cy="187.000000" edit_left="511" edit_top="241">
             <slot number="slot17" isMainBoard="1">
                 <interface sztype="Ethernet" interfacename="GE" count="1" />
                 <interface sztype="Ethernet" interfacename="GE" count="2" />
             </slot>
         </dev>
-        <dev id="901AFDA4-B867-4ea4-A491-9A9E84A78C7A" name="LSW1" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-DE-17-74" com_port="2002" bootmode="0" cx="486.000000" cy="389.000000" edit_left="513" edit_top="443">
+        <dev id="922F3F8E-4493-41c6-838E-B9EBB0603D5E" name="LSW2" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-17-4C-3E" com_port="2003" bootmode="0" cx="686.000000" cy="386.000000" edit_left="713" edit_top="440">
             <slot number="slot17" isMainBoard="1">
                 <interface sztype="Ethernet" interfacename="GE" count="24" />
-            </slot>
-        </dev>
-        <dev id="922F3F8E-4493-41c6-838E-B9EBB0603D5E" name="LSW2" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-17-4C-3E" com_port="2003" bootmode="0" cx="685.000000" cy="388.000000" edit_left="712" edit_top="442">
-            <slot number="slot17" isMainBoard="1">
-                <interface sztype="Ethernet" interfacename="GE" count="24" />
-            </slot>
-        </dev>
-        <dev id="9023931E-AC74-4092-9424-F686D68A2F1B" name="AR2" poe="0" model="AR2220" settings="" system_mac="00-E0-FC-FC-7C-29" com_port="2001" bootmode="0" cx="684.000000" cy="189.000000" edit_left="711" edit_top="243">
-            <slot number="slot17" isMainBoard="1">
-                <interface sztype="Ethernet" interfacename="GE" count="1" />
-                <interface sztype="Ethernet" interfacename="GE" count="2" />
             </slot>
         </dev>
     </devices>
@@ -48,13 +48,13 @@
             <interfacePair lineName="Copper" srcIndex="0" srcBoundRectIsMoved="0" srcBoundRect_X="508.189117" srcBoundRect_Y="131.359756" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="509.532013" tarBoundRect_Y="170.841187" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
         <line srcDeviceID="922F3F8E-4493-41c6-838E-B9EBB0603D5E" destDeviceID="9023931E-AC74-4092-9424-F686D68A2F1B">
-            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="711.783020" srcBoundRect_Y="371.816772" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="1" tarBoundRectIsMoved="0" tarBoundRect_X="711.216980" tarBoundRect_Y="259.183228" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="712.561584" srcBoundRect_Y="369.818451" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="1" tarBoundRectIsMoved="0" tarBoundRect_X="711.438416" tarBoundRect_Y="259.181549" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
         <line srcDeviceID="901AFDA4-B867-4ea4-A491-9A9E84A78C7A" destDeviceID="922F3F8E-4493-41c6-838E-B9EBB0603D5E">
-            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="556.183228" srcBoundRect_Y="415.782990" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="668.816772" tarBoundRect_Y="415.217010" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="555.178955" srcBoundRect_Y="415.355530" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="669.821045" tarBoundRect_Y="413.644470" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
         <line srcDeviceID="85357491-D574-4c2b-AD1D-E31F0FD29B64" destDeviceID="901AFDA4-B867-4ea4-A491-9A9E84A78C7A">
-            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="511.427551" srcBoundRect_Y="257.181641" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="512.572449" tarBoundRect_Y="372.818359" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
+            <interfacePair lineName="Copper" srcIndex="1" srcBoundRectIsMoved="0" srcBoundRect_X="511.213776" srcBoundRect_Y="257.183228" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="511.786224" tarBoundRect_Y="372.816772" tarOffset_X="0.000000" tarOffset_Y="0.000000" />
         </line>
         <line srcDeviceID="85357491-D574-4c2b-AD1D-E31F0FD29B64" destDeviceID="4C3B8B05-436B-4ef1-BF35-361BD4420D44">
             <interfacePair lineName="Copper" srcIndex="2" srcBoundRectIsMoved="0" srcBoundRect_X="467.932495" srcBoundRect_Y="217.166733" srcOffset_X="0.000000" srcOffset_Y="0.000000" tarIndex="0" tarBoundRectIsMoved="0" tarBoundRect_X="418.067505" tarBoundRect_Y="220.833267" tarOffset_X="0.000000" tarOffset_Y="0.000000" />

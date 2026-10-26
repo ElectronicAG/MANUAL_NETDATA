@@ -66,6 +66,26 @@ Para editar el tablero correspondiente, se debe de ingresar al dashboard y dar c
 \end{figure}
 \end{itemize}
 
+\item En este caso, se colocaron gráficas de los puertos utilizados en cada router. También se colocó un bloque de texto, el cual permite elegir si es título, subtitulo, o parrafo, en este caso se seleccionó título.
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.45]{Pictures/RED1.png}
+    \caption{Gráfica puertos, ejemplo de router A}
+\end{figure}
+
+
+\item Cuando son bloques de gráficas de métricas las que se colocan, en la parte superior del bloque (dashboard en modo edición), aparecen opciones para poder filtrar los datos, como por ejemplo, colocar el valor en máximo, mínimo, promedio, entre otros. 
+
+
+   \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.45]{Pictures/RED5.png}
+    \caption{Ejemplo de filtro colocado en las gráficas de interfaces }
+\end{figure}
+
+
+\end{itemize}
 
 \section{Configuración de una alerta de latencia para los dispositivos SNMP}
 
@@ -160,8 +180,6 @@ De esta forma, se implementó una única plantilla capaz de supervisar automáti
     \includegraphics[scale= 0.4]{Pictures/DAS7.png}
     \caption{Alertas generadas de ICMP elevado.}
 \end{figure}
-
-\end{itemize}
 
 
 \section{Configuración de alertas por fallo en la recolección SNMP}
@@ -526,10 +544,905 @@ Como resultado, Netdata mostró gráficamente los cuatro dispositivos Huawei y l
 
 
 
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.55]{Pictures/DAS9.png}
+    \caption{Topología SNMP}
+\end{figure}
+Al dar clic sobre cualquier dispositivo, se puede observar que se muestran ciertos datos, como por ejemplo sus interfaces, si estan activas o no, vecinos, ciertas etiquetas, etc.
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.55]{Pictures/opciones.png}
+    \caption{Información sobre un dispositivo}
+\end{figure}
 
+
+
+NOTA: Esta topología es cambiante, si por ejemplo un dispositivo deja de funcionar, o se cae una interfaz, ese dispositivo deja de estar visible en la red. 
+
+\subsection{Realizar una topología fija interactiva}
+
+
+\section{Habilitación del monitoreo de OSPF y MPLS mediante SNMP}
+
+Para supervisar el estado de los protocolos OSPF y MPLS desde Netdata, fue necesario comprobar que los dispositivos Huawei expusieran esta información mediante SNMP.
+
+Aunque OSPF y MPLS se encontraban funcionando correctamente, esto no garantiza que sus estados internos puedan consultarse automáticamente mediante SNMP. En los equipos Huawei, la información del proceso OSPF debe vincularse explícitamente con la MIB estándar de OSPF. \cite{netdata46}
+
+\subsection{Vinculación del proceso OSPF con SNMP}
+
+Huawei permite ejecutar varios procesos OSPF simultáneamente. Por esta razón, el dispositivo necesita conocer cuál de estos procesos debe exponer mediante la MIB estándar \texttt{OSPF-MIB}. \cite{netdata25}
+
+Primero se identificó el proceso OSPF utilizado en cada dispositivo:
+
+\begin{lstlisting}[style=terminal]
+display ospf brief
+\end{lstlisting}
+
+También se utilizó el siguiente comando para comprobar la configuración:
+
+\begin{lstlisting}[style=terminal]
+display current-configuration | include ospf
+\end{lstlisting}
+
+En la topología implementada se utilizó el proceso OSPF número 1. Por lo tanto, en cada router y switch se ejecutó:
+
+\begin{lstlisting}[style=terminal]
+system-view
+ospf mib-binding 1
+return
+save
+\end{lstlisting}
+
+El comando \texttt{ospf mib-binding 1} vincula el proceso OSPF número 1 con la MIB pública de OSPF. Después de realizar esta vinculación, el dispositivo puede responder a las consultas SNMP relacionadas con las interfaces, áreas y vecinos OSPF.
+
+El comando debe ejecutarse desde la vista global del equipo:
+
+\begin{lstlisting}[style=terminal]
+[AR651-A] ospf mib-binding 1
+\end{lstlisting}
+
+Si se utiliza un proceso OSPF diferente, el número 1 debe sustituirse por el identificador correspondiente:
+
+\begin{lstlisting}[style=terminal]
+ospf mib-binding <process-id>
+\end{lstlisting}
+
+Finalmente, se guardó la configuración para evitar que se perdiera después de reiniciar los dispositivos:
+
+\begin{lstlisting}[style=terminal]
+save
+\end{lstlisting}
+
+\subsection{Importancia de la vinculación OSPF}
+
+Antes de realizar la vinculación, la consulta de la tabla de vecinos OSPF no devolvía información, aunque las adyacencias estaban establecidas y el protocolo funcionaba correctamente.
+
+Esto se debe a que el funcionamiento del protocolo de enrutamiento y su exposición mediante SNMP son procesos diferentes. El comando \texttt{ospf mib-binding} no habilita OSPF ni modifica las adyacencias existentes; únicamente permite que un sistema de gestión consulte su estado mediante la MIB estándar.
+
+Después de realizar la vinculación, se pudo consultar el objeto \texttt{ospfNbrState}, cuyo OID es:
+
+\begin{lstlisting}[style=terminal]
+1.3.6.1.2.1.14.10.1.6
+\end{lstlisting}
+
+La consulta utilizada para los routers y switches con autenticación SHA-256 y cifrado AES (Recordar que estos comandos son desde el servidor de Netdata, en este caso, Raspberry pi) fue:
+
+\begin{lstlisting}[style=terminal]
+snmpwalk -v3 \
+-l authPriv \
+-u netdata-user \
+-a SHA-256 \
+-A 'NetAuth2026' \
+-x AES \
+-X 'NetPriv2026' \
+1.1.1.1 \
+1.3.6.1.2.1.14.10.1.6
+\end{lstlisting}
+
+\subsection{Estados de los vecinos OSPF}
+
+El objeto \texttt{ospfNbrState} representa el estado actual de cada vecino OSPF. Los valores posibles se presentan en la Tabla~\ref{tab:estados-ospf}.
+
+\begin{table}[H]
+\centering
+\caption{Estados de una adyacencia OSPF}
+\label{tab:estados-ospf}
+\begin{tabular}{c|l|p{8cm}}
+\hline
+\textbf{Valor} & \textbf{Estado} & \textbf{Descripción} \\ \hline
+
+1 & Down &
+No se han recibido paquetes Hello del vecino durante el intervalo correspondiente. \\ \hline
+
+2 & Attempt &
+El dispositivo intenta establecer comunicación con un vecino configurado manualmente. Este estado se utiliza principalmente en redes NBMA. \\ \hline
+
+3 & Init &
+Se han recibido paquetes Hello del vecino, pero el router local todavía no aparece identificado dentro de dichos paquetes. \\ \hline
+
+4 & Two-Way &
+Existe comunicación bidireccional entre los routers. Ambos dispositivos se reconocen mediante los paquetes Hello. \\ \hline
+
+5 & Exchange Start &
+Los vecinos negocian cuál dispositivo actuará como maestro durante el intercambio de información de la base de datos. \\ \hline
+
+6 & Exchange &
+Los routers intercambian paquetes de descripción de base de datos o DBD. \\ \hline
+
+7 & Loading &
+Los dispositivos solicitan y reciben información faltante de la base de datos de estado de enlace. \\ \hline
+
+8 & Full &
+La adyacencia está completamente establecida y las bases de datos de estado de enlace se encuentran sincronizadas. \\ \hline
+
+\end{tabular}
+\end{table}
+
+El estado esperado durante la operación normal es:
+
+\begin{lstlisting}[style=terminal]
+INTEGER: 8
+\end{lstlisting}
+
+Por lo tanto, el valor 8 indica que el vecino se encuentra en estado \textit{Full}. Cualquier estado inferior representa que la adyacencia todavía está en proceso de formación o que existe algún problema de comunicación.
+
+\subsection{Consulta del estado MPLS LDP}
+
+Para verificar el estado de MPLS se consultó la tabla de sesiones del protocolo LDP (\textit{Label Distribution Protocol}).
+
+El objeto utilizado fue \texttt{mplsLdpSessionState}, cuyo OID es:
+
+\begin{lstlisting}[style=terminal]
+1.3.6.1.2.1.10.166.4.1.3.3.1.2
+\end{lstlisting}
+
+En los routers y switches se utilizó la siguiente consulta:
+
+\begin{lstlisting}[style=terminal]
+snmpwalk -v3 \
+-l authPriv \
+-u netdata-user \
+-a SHA-256 \
+-A 'NetAuth2026' \
+-x AES \
+-X 'NetPriv2026' \
+1.1.1.1 \
+1.3.6.1.2.1.10.166.4.1.3.3.1.2
+\end{lstlisting}
+
+
+
+\subsection{Estados de las sesiones MPLS LDP}
+
+Los posibles estados de una sesión LDP se presentan en la Tabla~\ref{tab:estados-ldp}.
+
+\begin{table}[H]
+\centering
+\caption{Estados de una sesión MPLS LDP}
+\label{tab:estados-ldp}
+\begin{tabular}{c|l|p{8cm}}
+\hline
+\textbf{Valor} & \textbf{Estado} & \textbf{Descripción} \\ \hline
+
+1 & Nonexistent &
+La sesión LDP no existe o fue eliminada. \\ \hline
+
+2 & Initialized &
+La sesión fue inicializada y comenzó el proceso de establecimiento. \\ \hline
+
+3 & Open Received &
+Se recibió un mensaje de inicialización LDP desde el dispositivo vecino. \\ \hline
+
+4 & Open Sent &
+Se envió un mensaje de inicialización hacia el vecino y se espera la continuación de la negociación. \\ \hline
+
+5 & Operational &
+La sesión está completamente establecida y puede intercambiar etiquetas MPLS. \\ \hline
+
+\end{tabular}
+\end{table}
+
+Durante las pruebas se obtuvo el siguiente resultado:
+
+\begin{lstlisting}[style=terminal]
+INTEGER: 5
+\end{lstlisting}
+
+El valor 5 indica que la sesión LDP está en estado \textit{Operational}. En este estado, los dispositivos pueden intercambiar etiquetas y construir los caminos conmutados por etiquetas o LSP (\textit{Label Switched Paths}).
+
+\subsection{Interpretación conjunta de los estados}
+
+La supervisión conjunta de las interfaces, las adyacencias OSPF y las sesiones MPLS LDP permite identificar con mayor precisión el origen de una falla.
+
+\begin{table}[H]
+\centering
+\caption{Interpretación conjunta de los estados de la red}
+\label{tab:interpretacion-ospf-mpls}
+\begin{tabular}{c|c|c|p{7cm}}
+\hline
+\textbf{Interfaz} & \textbf{OSPF} & \textbf{LDP} & \textbf{Interpretación} \\ \hline
+
+Up & Full & Operational &
+El enlace físico, el protocolo OSPF y la sesión MPLS funcionan correctamente. \\ \hline
+
+Up & Distinto de Full & Operational o inactivo &
+La interfaz funciona, pero existe una falla o proceso de convergencia en OSPF. \\ \hline
+
+Up & Full & Distinto de Operational &
+La conectividad IP y OSPF funcionan, pero existe un problema específico en MPLS LDP. \\ \hline
+
+Down & Down & Nonexistent &
+La interfaz o el enlace físico se encuentra caído, provocando también la pérdida de OSPF y MPLS. \\ \hline
+
+\end{tabular}
+\end{table}
+
+Esta separación permite que el sistema de monitoreo no se limite a indicar que un dispositivo está disponible, sino que identifique si la falla corresponde al enlace físico, al protocolo de enrutamiento OSPF o al intercambio de etiquetas MPLS LDP.
+
+Para comprobar los índices exactos que capturas los dispositivos se usa:
+
+\begin{lstlisting}[style=terminal]
+for equipo in \
+  "AR651-A 1.1.1.1 AES" \
+  "S6730H-C 2.2.2.2 AES" \
+  "S6730H-D 3.3.3.3 AES" \
+  "AR651-B 4.4.4.4 AES"
+do
+  set -- $equipo
+  nombre=$1
+  ip=$2
+  cifrado=$3
+
+  echo "========== $nombre - OSPF =========="
+
+  snmpwalk -On -v3 \
+    -l authPriv \
+    -u netdata-user \
+    -a SHA-256 \
+    -A 'NetAuth2026' \
+    -x "$cifrado" \
+    -X 'NetPriv2026' \
+    "$ip" \
+    1.3.6.1.2.1.14.10.1.6
+
+  echo "========== $nombre - MPLS LDP =========="
+
+  snmpwalk -On -v3 \
+    -l authPriv \
+    -u netdata-user \
+    -a SHA-256 \
+    -A 'NetAuth2026' \
+    -x "$cifrado" \
+    -X 'NetPriv2026' \
+    "$ip" \
+    1.3.6.1.2.1.10.166.4.1.3.3.1.2
+done
+\end{lstlisting}
 
     \begin{figure}[H]
     \centering
-    \includegraphics[scale= 0.4]{Pictures/DAS9.png}
-    \caption{Topología SNMP.}
+    \includegraphics[scale= 0.8]{Pictures/OIDS.png}
+    \caption{Resultado de datos exactos que muestran los equipos}
 \end{figure}
+
+\subsection{Crear el perfil de enrutamiento en Netdata}
+
+\begin{itemize}
+    \item Crear el perfil de enrutamiento
+    \begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/go.d/snmp.profiles/huawei-routing-status.yaml
+\end{lstlisting}
+
+\item Pegar lo siguiente:
+
+\begin{lstlisting}[style=terminal]
+selector:
+  - sysobjectid:
+      include:
+        - "1.3.6.1.4.1.2011.*"
+
+metrics:
+  # ==========================================================
+  # Estado de vecinos OSPF
+  # Estado correcto: full = 8
+  # ==========================================================
+  - MIB: OSPF-MIB
+    table:
+      OID: 1.3.6.1.2.1.14.10
+      name: ospfNbrTable
+
+    symbols:
+      - OID: 1.3.6.1.2.1.14.10.1.6
+        name: ospfNbrState
+        metric_type: gauge
+
+        chart_meta:
+          description: Estado de la adyacencia OSPF
+          family: "Routing/OSPF/Neighbors"
+          unit: "state"
+
+        mapping:
+          items:
+            1: down
+            2: attempt
+            3: init
+            4: twoWay
+            5: exchangeStart
+            6: exchange
+            7: loading
+            8: full
+
+    metric_tags:
+      - tag: neighbor
+        symbol:
+          name: ospfNbrIpAddr
+          format: ip_address
+        index_transform:
+          - start: 0
+            end: 3
+
+  # ==========================================================
+  # Estado de sesiones MPLS LDP
+  # Estado correcto: operational = 5
+  # ==========================================================
+  - MIB: MPLS-LDP-STD-MIB
+    table:
+      OID: 1.3.6.1.2.1.10.166.4.1.3.3
+      name: mplsLdpSessionTable
+
+    symbols:
+      - OID: 1.3.6.1.2.1.10.166.4.1.3.3.1.2
+        name: mplsLdpSessionState
+        metric_type: gauge
+
+        chart_meta:
+          description: Estado de la sesi\'on MPLS LDP
+          family: "Routing/MPLS/LDP Sessions"
+          unit: "state"
+
+        mapping:
+          items:
+            1: nonexistent
+            2: initialized
+            3: openrec
+            4: opensent
+            5: operational
+
+    metric_tags:
+      - tag: peer
+        symbol:
+          name: mplsLdpPeerAddress
+          format: ip_address
+        index_transform:
+          - start: 7
+            drop_right: 2
+\end{lstlisting}
+
+Netdata exige que las métricas provenientes de tablas tengan al menos una etiqueta que identifique cada fila. Aquí las etiquetas neighbor y peer se extraen del índice del OID, en lugar de consultar otra columna SNMP. El mapping convierte los números en dimensiones legibles, como full, down y operational. \cite{netdata1almacenamiento}
+
+
+\item Se establecen permisos:
+
+\begin{lstlisting}[style=terminal]
+
+sudo chown root:netdata \
+  /etc/netdata/go.d/snmp.profiles/huawei-routing-status.yaml
+
+sudo chmod 640 \
+  /etc/netdata/go.d/snmp.profiles/huawei-routing-status.yaml
+
+sudo chmod 750 \
+  /etc/netdata/go.d/snmp.profiles
+
+
+  \end{lstlisting}
+
+
+\item Luego de esto, se debe de reiniciar Netdata:
+\begin{lstlisting}[style=terminal]
+sudo systemctl restart netdata
+ \end{lstlisting}
+
+\item Antes de crear las alertas, necesitamos confirmar los nombres exactos de las dimensiones generadas (full, down, operational, etc.). Ejecutar:
+ \begin{lstlisting}[style=terminal]
+python3 - <<'PY'
+import json
+import urllib.request
+
+nodes = ["AR651-A", "S6730H-C", "S6730H-D", "AR651-B"]
+
+for node in nodes:
+    url = f"http://127.0.0.1:19999/host/{node}/api/v1/charts"
+
+    with urllib.request.urlopen(url) as response:
+        charts = json.load(response).get("charts", {})
+
+    print(f"\n========== {node} ==========")
+
+    for chart in charts.values():
+        chart_id = chart.get("id", "")
+
+        # Solo las graficas limpias creadas por el perfil nuevo.
+        if (
+            "ospfNbrState" in chart_id
+            or "mplsLdpSessionState" in chart_id
+        ):
+            dimensions = list(chart.get("dimensions", {}).keys())
+
+            print("ID:", chart_id)
+            print("CONTEXT:", chart.get("context"))
+            print("DIMENSIONS:", dimensions)
+            print("LABELS:", chart.get("chart_labels", {}))
+            print()
+PY
+ \end{lstlisting}
+
+    \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.51]{Pictures/sa.png}
+    \caption{Ejemplo de salida con Router A}
+\end{figure}
+
+\item Crear las alertas. 
+
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/health.d/huawei_routing.conf
+    \end{lstlisting}
+Pegar el contenido:
+\begin{lstlisting}[style=terminal]
+# ============================================================
+# Estado permanente de enlaces OSPF esperados
+#
+# Contexto generado por:
+#   huawei_routing.chart.sh
+#
+# Valor:
+#   1 = ambos extremos se encuentran en Full
+#   0 = estado incorrecto, fila ausente o equipo inaccesible
+# ============================================================
+
+template: huawei_ospf_expected_link_down
+      on: huawei.routing.ospf_link
+   class: Availability
+    type: Network
+component: OSPF
+    calc: $available
+   units: state
+   every: 30s
+    crit: $this < 1
+   delay: up 30s down 30s
+ summary: Enlace OSPF ${label:link} caido
+    info: La adyacencia OSPF ${label:link} dejo de estar en estado Full o alguno de sus extremos no responde por SNMP.
+      to: sysadmin
+
+
+# ============================================================
+# Estado permanente de sesiones MPLS LDP esperadas
+#
+# Valor:
+#   1 = ambos extremos se encuentran en Operational
+#   0 = estado incorrecto, fila ausente o equipo inaccesible
+# ============================================================
+
+template: huawei_mpls_ldp_expected_link_down
+      on: huawei.routing.ldp_link
+   class: Availability
+    type: Network
+component: MPLS
+    calc: $available
+   units: state
+   every: 30s
+    crit: $this < 1
+   delay: up 30s down 30s
+ summary: Sesion MPLS LDP ${label:link} caida
+    info: La sesion MPLS LDP ${label:link} dejo de estar en estado Operational o alguno de sus extremos no responde por SNMP.
+      to: sysadmin
+ \end{lstlisting}
+
+ La ventana de un minuto tolera una muestra aislada, mientras que el retraso de 30 segundos evita alertas por una transición demasiado breve. Las variables label:neighbor, label:peer y label:sysName se sustituyen por las etiquetas de cada gráfica.
+
+ \item Aplicar permisos:
+ \begin{lstlisting}[style=terminal]
+ sudo chown root:netdata \
+  /etc/netdata/health.d/huawei_routing.conf
+
+sudo chmod 640 \
+  /etc/netdata/health.d/huawei_routing.conf
+
+ \end{lstlisting}
+
+
+\item Recargar las alertas:
+
+\begin{lstlisting}[style=terminal]
+sudo netdatacli reload-health
+ \end{lstlisting}
+
+\item Comprobar:
+\begin{lstlisting}[style=terminal]
+python3 - <<'PY'
+import json
+import urllib.request
+
+nodes = ["AR651-A", "S6730H-C", "S6730H-D", "AR651-B"]
+
+for node in nodes:
+    url = f"http://127.0.0.1:19999/host/{node}/api/v1/alarms?all"
+
+    print(f"\n========== {node} ==========")
+
+    with urllib.request.urlopen(url) as response:
+        alarms = json.load(response).get("alarms", {})
+
+    found = False
+
+    for alarm in alarms.values():
+        name = alarm.get("name", "")
+
+        if name in [
+            "huawei_ospf_neighbor_not_full",
+            "huawei_mpls_ldp_session_not_operational"
+        ]:
+            found = True
+
+            print(
+                "ALERTA:", name,
+                "\nCHART:", alarm.get("chart"),
+                "\nESTADO:", alarm.get("status"),
+                "\nVALOR:", alarm.get("value"),
+                "\n"
+            )
+
+    if not found:
+        print("No hay instancias activas.")
+PY
+
+
+ \end{lstlisting}
+
+     \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.65]{Pictures/wq.png}
+    \caption{Ejemplo de salida con Router A y switch C}
+\end{figure}
+
+
+\item Ahora se debe de crear comprobaciones permanentes, esto porque a la hora de que se caiga un enlace OSPF, los dispositivos simplemente los borran de su tabla de enrutamiento, entonces netdata, nunca recibe un error, para esto se realiza un nuevo colector de netdata, asi como las alertas:
+\begin{lstlisting}[style=terminal]
+sudo mkdir -p /etc/netdata/charts.d
+sudo nano /etc/netdata/charts.d/huawei_routing.conf
+ \end{lstlisting}
+
+ En este archivo pegar:
+ \begin{lstlisting}[style=terminal]
+# Frecuencia de comprobacion
+huawei_routing_update_every=30
+
+# Credenciales SNMPv3
+HUAWEI_SNMP_USER="netdata-user"
+HUAWEI_AUTH_PROTOCOL="SHA"
+HUAWEI_AUTH_KEY="NetAuth2026"
+HUAWEI_PRIVACY_KEY="NetPriv2026"
+
+# Direcciones de administracion
+AR651_A_HOST="1.1.1.1"
+S6730H_C_HOST="2.2.2.2"
+S6730H_D_HOST="3.3.3.3"
+AR651_B_HOST="4.4.4.4"
+
+# Cifrado empleado en eNSP
+AR651_A_PRIVACY="AES"
+S6730H_C_PRIVACY="DES"
+S6730H_D_PRIVACY="DES"
+AR651_B_PRIVACY="AES"
+\end{lstlisting}
+
+\item Configurar los permisos:
+
+\begin{lstlisting}[style=terminal]
+sudo chown root:netdata \
+  /etc/netdata/charts.d/huawei_routing.conf
+
+sudo chmod 640 \
+  /etc/netdata/charts.d/huawei_routing.conf
+ \end{lstlisting}
+
+ \item Ahora se debe de crear el nuevo colector:
+ 
+\begin{lstlisting}[style=terminal]
+sudo nano \
+  /usr/libexec/netdata/charts.d/huawei_routing.chart.sh
+ \end{lstlisting}
+
+
+ En este archivo pegar:
+ \begin{lstlisting}[style=terminal]
+# shellcheck shell=bash
+
+# ============================================================
+# Comprobacion permanente de enlaces OSPF y MPLS LDP Huawei
+#
+# Valores publicados:
+#   1 = ambos extremos se encuentran en el estado esperado
+#   0 = estado incorrecto, fila ausente o equipo inaccesible
+# ============================================================
+
+huawei_routing_update_every="${huawei_routing_update_every:-30}"
+huawei_routing_priority=90000
+
+
+# ------------------------------------------------------------
+# Consulta un OID y comprueba su valor.
+#
+# Parametros:
+#   $1 = dispositivo
+#   $2 = protocolo de privacidad: AES o DES
+#   $3 = OID completo
+#   $4 = valor esperado
+# ------------------------------------------------------------
+
+huawei_routing_oid_is()
+{
+    local host="$1"
+    local privacy="$2"
+    local oid="$3"
+    local expected="$4"
+    local value
+
+    value="$(
+        snmpget \
+          -v3 \
+          -l authPriv \
+          -u "${HUAWEI_SNMP_USER}" \
+          -a "${HUAWEI_AUTH_PROTOCOL}" \
+          -A "${HUAWEI_AUTH_KEY}" \
+          -x "${privacy}" \
+          -X "${HUAWEI_PRIVACY_KEY}" \
+          -t 2 \
+          -r 0 \
+          -Oqv \
+          "${host}" \
+          "${oid}" \
+          2>/dev/null
+    )"
+
+    value="${value//[[:space:]]/}"
+
+    [[ "${value}" == "${expected}" ]]
+}
+
+
+# ------------------------------------------------------------
+# Devuelve 1 si los dos extremos estan correctos.
+# De lo contrario, devuelve 0.
+# ------------------------------------------------------------
+
+huawei_routing_pair_state()
+{
+    if huawei_routing_oid_is "$1" "$2" "$3" "$4" &&
+       huawei_routing_oid_is "$5" "$6" "$7" "$8"
+    then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+
+huawei_routing_check()
+{
+    require_cmd snmpget || return 1
+
+    [[ -n "${HUAWEI_SNMP_USER}" ]] || return 1
+    [[ -n "${HUAWEI_AUTH_KEY}" ]] || return 1
+    [[ -n "${HUAWEI_PRIVACY_KEY}" ]] || return 1
+
+    return 0
+}
+
+
+huawei_routing_create()
+{
+    cat <<EOF
+CHART huawei_routing.ospf_a_c '' 'OSPF: AR651-A - S6730H-C' 'state' 'Routing/OSPF' 'huawei.routing.ospf_link' line 90000 ${huawei_routing_update_every}
+CLABEL protocol OSPF 1
+CLABEL link AR651-A--S6730H-C
+CLABEL_COMMIT
+DIMENSION available 'available' absolute 1 1
+
+CHART huawei_routing.ospf_c_d '' 'OSPF: S6730H-C - S6730H-D' 'state' 'Routing/OSPF' 'huawei.routing.ospf_link' line 90001 ${huawei_routing_update_every}
+CLABEL protocol OSPF 1
+CLABEL link S6730H-C--S6730H-D
+CLABEL_COMMIT
+DIMENSION available 'available' absolute 1 1
+
+CHART huawei_routing.ospf_d_b '' 'OSPF: S6730H-D - AR651-B' 'state' 'Routing/OSPF' 'huawei.routing.ospf_link' line 90002 ${huawei_routing_update_every}
+CLABEL protocol OSPF 1
+CLABEL link S6730H-D--AR651-B
+CLABEL_COMMIT
+DIMENSION available 'available' absolute 1 1
+
+CHART huawei_routing.ldp_a_c '' 'MPLS LDP: AR651-A - S6730H-C' 'state' 'Routing/MPLS LDP' 'huawei.routing.ldp_link' line 90003 ${huawei_routing_update_every}
+CLABEL protocol MPLS_LDP 1
+CLABEL link AR651-A--S6730H-C
+CLABEL_COMMIT
+DIMENSION available 'available' absolute 1 1
+
+CHART huawei_routing.ldp_c_d '' 'MPLS LDP: S6730H-C - S6730H-D' 'state' 'Routing/MPLS LDP' 'huawei.routing.ldp_link' line 90004 ${huawei_routing_update_every}
+CLABEL protocol MPLS_LDP 1
+CLABEL link S6730H-C--S6730H-D
+CLABEL_COMMIT
+DIMENSION available 'available' absolute 1 1
+
+CHART huawei_routing.ldp_d_b '' 'MPLS LDP: S6730H-D - AR651-B' 'state' 'Routing/MPLS LDP' 'huawei.routing.ldp_link' line 90005 ${huawei_routing_update_every}
+CLABEL protocol MPLS_LDP 1
+CLABEL link S6730H-D--AR651-B
+CLABEL_COMMIT
+DIMENSION available 'available' absolute 1 1
+EOF
+
+    return 0
+}
+
+
+huawei_routing_update()
+{
+    local microseconds="$1"
+
+    local ospf_a_c
+    local ospf_c_d
+    local ospf_d_b
+    local ldp_a_c
+    local ldp_c_d
+    local ldp_d_b
+
+    # ========================================================
+    # OSPF: valor esperado 8 = Full
+    # ========================================================
+
+    ospf_a_c="$(
+        huawei_routing_pair_state \
+          "${AR651_A_HOST}" "${AR651_A_PRIVACY}" \
+          "1.3.6.1.2.1.14.10.1.6.10.0.12.2.0" "8" \
+          "${S6730H_C_HOST}" "${S6730H_C_PRIVACY}" \
+          "1.3.6.1.2.1.14.10.1.6.10.0.12.1.0" "8"
+    )"
+
+    ospf_c_d="$(
+        huawei_routing_pair_state \
+          "${S6730H_C_HOST}" "${S6730H_C_PRIVACY}" \
+          "1.3.6.1.2.1.14.10.1.6.10.0.23.2.0" "8" \
+          "${S6730H_D_HOST}" "${S6730H_D_PRIVACY}" \
+          "1.3.6.1.2.1.14.10.1.6.10.0.23.1.0" "8"
+    )"
+
+    ospf_d_b="$(
+        huawei_routing_pair_state \
+          "${S6730H_D_HOST}" "${S6730H_D_PRIVACY}" \
+          "1.3.6.1.2.1.14.10.1.6.10.0.34.2.0" "8" \
+          "${AR651_B_HOST}" "${AR651_B_PRIVACY}" \
+          "1.3.6.1.2.1.14.10.1.6.10.0.34.1.0" "8"
+    )"
+
+    # ========================================================
+    # MPLS LDP: valor esperado 5 = Operational
+    # ========================================================
+
+    ldp_a_c="$(
+        huawei_routing_pair_state \
+          "${AR651_A_HOST}" "${AR651_A_PRIVACY}" \
+          "1.3.6.1.2.1.10.166.4.1.3.3.1.2.1.1.1.1.0.0.4.2.2.2.2.0.0" "5" \
+          "${S6730H_C_HOST}" "${S6730H_C_PRIVACY}" \
+          "1.3.6.1.2.1.10.166.4.1.3.3.1.2.2.2.2.2.0.0.6.1.1.1.1.0.0" "5"
+    )"
+
+    ldp_c_d="$(
+        huawei_routing_pair_state \
+          "${S6730H_C_HOST}" "${S6730H_C_PRIVACY}" \
+          "1.3.6.1.2.1.10.166.4.1.3.3.1.2.2.2.2.2.0.0.7.3.3.3.3.0.0" "5" \
+          "${S6730H_D_HOST}" "${S6730H_D_PRIVACY}" \
+          "1.3.6.1.2.1.10.166.4.1.3.3.1.2.3.3.3.3.0.0.6.2.2.2.2.0.0" "5"
+    )"
+
+    ldp_d_b="$(
+        huawei_routing_pair_state \
+          "${S6730H_D_HOST}" "${S6730H_D_PRIVACY}" \
+          "1.3.6.1.2.1.10.166.4.1.3.3.1.2.3.3.3.3.0.0.7.4.4.4.4.0.0" "5" \
+          "${AR651_B_HOST}" "${AR651_B_PRIVACY}" \
+          "1.3.6.1.2.1.10.166.4.1.3.3.1.2.4.4.4.4.0.0.4.3.3.3.3.0.0" "5"
+    )"
+
+    cat <<EOF
+BEGIN huawei_routing.ospf_a_c ${microseconds}
+SET available = ${ospf_a_c}
+END
+
+BEGIN huawei_routing.ospf_c_d ${microseconds}
+SET available = ${ospf_c_d}
+END
+
+BEGIN huawei_routing.ospf_d_b ${microseconds}
+SET available = ${ospf_d_b}
+END
+
+BEGIN huawei_routing.ldp_a_c ${microseconds}
+SET available = ${ldp_a_c}
+END
+
+BEGIN huawei_routing.ldp_c_d ${microseconds}
+SET available = ${ldp_c_d}
+END
+
+BEGIN huawei_routing.ldp_d_b ${microseconds}
+SET available = ${ldp_d_b}
+END
+EOF
+
+    return 0
+}
+ \end{lstlisting}
+
+ \item Aplicar permisos al colector:
+ \begin{lstlisting}[style=terminal]
+sudo chown root:netdata \
+  /usr/libexec/netdata/charts.d/huawei_routing.chart.sh
+
+sudo chmod 755 \
+  /usr/libexec/netdata/charts.d/huawei_routing.chart.sh
+ \end{lstlisting}
+
+ \item Para que netdata lo integre, se activa:
+ \begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/charts.d.conf
+ \end{lstlisting}
+
+ En este archivo, se debe de colocar yes
+\begin{lstlisting}[style=terminal]
+ huawei_routing="yes"
+ \end{lstlisting}
+
+
+\item Se debe de habilitar el proceso charts.d.plugin globalmente, para descargar los archivos complementarios necesarios, el mismo netdata en el archivo:
+\begin{lstlisting}[style=terminal]
+sudo nano /etc/netdata/netdata.conf
+ \end{lstlisting}
+ \begin{itemize}
+\item Recomienda actualizarlo a la última versión:
+\begin{lstlisting}[style=terminal]
+wget -O /etc/netdata/netdata.conf http://localhost:19999/netdata.conf
+ \end{lstlisting}
+
+
+
+  \item Luego de actulizarlo, se debe de buscar la lista de [plugins], y debe de quedar descomentado el servicio:
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.7]{Pictures/w1.png}
+    \caption{Servicio de charts.d habilitado}
+  
+\end{figure}
+\end{itemize}
+
+ \item Reiniciar el agente de netdata para aplicar los cambios:
+ 
+\begin{lstlisting}[style=terminal]
+sudo systemctl restart netdata
+ \end{lstlisting}
+
+ \item Se comprobó su funcionamiento apagando la interfaz que conecta switch D con router B, y en netdata aparece:
+ 
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[scale= 0.65]{Pictures/error.png}
+    \caption{Funcionamiento de alerta de caída de OSPF y MPLS}
+  
+\end{figure}
+
+\end{itemize}
+
+
+%\begin{lstlisting}[style=terminal]
+
+ %\end{lstlisting}
