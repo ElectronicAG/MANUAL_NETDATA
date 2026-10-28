@@ -20,13 +20,12 @@
                 <interface sztype="Ethernet" interfacename="Ethernet" count="1" />
             </slot>
         </dev>
-        <dev id="9023931E-AC74-4092-9424-F686D68A2F1B" name="AR2" poe="0" model="AR2220" settings="" system_mac="00-E0-FC-FC-7C-29" com_port="2001" bootmode="0" cx="684.000000" cy="189.000000" edit_left="711" edit_top="243">
+        <dev id="901AFDA4-B867-4ea4-A491-9A9E84A78C7A" name="LSW1" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-DE-17-74" com_port="2002" bootmode="0" cx="485.000000" cy="389.000000" edit_left="512" edit_top="443">
             <slot number="slot17" isMainBoard="1">
-                <interface sztype="Ethernet" interfacename="GE" count="1" />
-                <interface sztype="Ethernet" interfacename="GE" count="2" />
+                <interface sztype="Ethernet" interfacename="GE" count="24" />
             </slot>
         </dev>
-        <dev id="901AFDA4-B867-4ea4-A491-9A9E84A78C7A" name="LSW1" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-DE-17-74" com_port="2002" bootmode="0" cx="485.000000" cy="389.000000" edit_left="512" edit_top="443">
+        <dev id="922F3F8E-4493-41c6-838E-B9EBB0603D5E" name="LSW2" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-17-4C-3E" com_port="2003" bootmode="0" cx="686.000000" cy="386.000000" edit_left="713" edit_top="440">
             <slot number="slot17" isMainBoard="1">
                 <interface sztype="Ethernet" interfacename="GE" count="24" />
             </slot>
@@ -37,9 +36,10 @@
                 <interface sztype="Ethernet" interfacename="GE" count="2" />
             </slot>
         </dev>
-        <dev id="922F3F8E-4493-41c6-838E-B9EBB0603D5E" name="LSW2" poe="0" model="S5700" settings="" system_mac="4C-1F-CC-17-4C-3E" com_port="2003" bootmode="0" cx="686.000000" cy="386.000000" edit_left="713" edit_top="440">
+        <dev id="9023931E-AC74-4092-9424-F686D68A2F1B" name="AR2" poe="0" model="AR2220" settings="" system_mac="00-E0-FC-FC-7C-29" com_port="2001" bootmode="0" cx="684.000000" cy="189.000000" edit_left="711" edit_top="243">
             <slot number="slot17" isMainBoard="1">
-                <interface sztype="Ethernet" interfacename="GE" count="24" />
+                <interface sztype="Ethernet" interfacename="GE" count="1" />
+                <interface sztype="Ethernet" interfacename="GE" count="2" />
             </slot>
         </dev>
     </devices>

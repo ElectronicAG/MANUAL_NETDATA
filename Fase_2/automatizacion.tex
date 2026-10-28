@@ -560,7 +560,355 @@ Al dar clic sobre cualquier dispositivo, se puede observar que se muestran ciert
 
 NOTA: Esta topología es cambiante, si por ejemplo un dispositivo deja de funcionar, o se cae una interfaz, ese dispositivo deja de estar visible en la red. 
 
-\subsection{Realizar una topología fija interactiva}
+
+\section{Implementación de una topología de red personalizada}
+
+La topología SNMP incorporada en Netdata se genera dinámicamente a partir de
+información obtenida mediante protocolos y tablas como LLDP, ARP, OSPF y MPLS.
+Debido a este comportamiento, cuando un dispositivo deja de responder o una
+adyacencia desaparece de las tablas SNMP, Netdata puede retirar temporalmente
+el dispositivo o enlace de la representación gráfica.
+
+Por esta razón, se desarrolló una página web personalizada que utiliza Netdata
+como fuente de información. Netdata continúa realizando la recopilación,
+almacenamiento y procesamiento de las métricas, mientras que la página se
+encarga únicamente de representar gráficamente la topología.
+
+\subsection{Arquitectura de la solución}
+
+La solución implementada está compuesta por los siguientes elementos:
+
+\begin{itemize}
+    \item Netdata recopila las métricas SNMP de los cuatro dispositivos Huawei.
+    \item El colector personalizado de OSPF y MPLS LDP publica el estado permanente
+    de cada enlace.
+    \item Un servidor web desarrollado en Python publica la página en el puerto
+    TCP 8080.
+    \item El servidor Python funciona como intermediario entre el navegador y la
+    API local de Netdata.
+    \item Una página HTML representa permanentemente los cuatro dispositivos y
+    los tres enlaces de la red.
+    \item JavaScript consulta periódicamente las métricas de Netdata y actualiza
+    los colores, estados y valores de tráfico.
+\end{itemize}
+
+De esta manera, el navegador no se conecta directamente al puerto 19999 de
+Netdata. En su lugar, realiza las consultas mediante el servidor de la
+topología, el cual reenvía las solicitudes hacia Netdata de forma local.
+
+
+\subsection{Contenido del paquete instalado}
+
+La aplicación fue distribuida mediante el archivo:
+
+\begin{lstlisting}[style=terminal]
+netdata-topology.tar.gz
+\end{lstlisting}
+
+El archivo comprimido contiene los siguientes elementos:
+
+\begin{table}[H]
+\centering
+\caption{Archivos de la topología personalizada}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+\textbf{Archivo} & \textbf{Función} \\ \hline
+\texttt{index.html} &
+Contiene la interfaz gráfica, el diseño de la red, los dispositivos, enlaces,
+colores, indicadores de estado y el código JavaScript que consulta las métricas
+de Netdata. \\ \hline
+
+\texttt{server.py} &
+Implementa un servidor HTTP en Python. Publica la página web en el puerto 8080
+y reenvía las consultas hacia la API local de Netdata. \\ \hline
+
+\texttt{netdata-topology.service} &
+Define un servicio de systemd para iniciar automáticamente la aplicación al
+encender la Raspberry Pi. \\ \hline
+
+\texttt{README.txt} &
+Contiene instrucciones básicas para instalar y ejecutar la aplicación. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Topología representada}
+
+La página mantiene una topología fija con los siguientes dispositivos:
+
+\begin{verbatim}
+AR651-A --- S6730H-C --- S6730H-D --- AR651-B
+\end{verbatim}
+
+Los dispositivos permanecen visibles aunque alguno deje de responder. El color
+de cada elemento indica su estado:
+
+\begin{itemize}
+    \item Verde: dispositivo o enlace disponible.
+    \item Rojo: dispositivo, adyacencia OSPF o sesión MPLS LDP caída.
+    \item Amarillo: todavía no existen datos suficientes para determinar el
+    estado.
+\end{itemize}
+
+Los dispositivos utilizados por la página se muestran en la
+Tabla~\ref{tab:dispositivos-topologia}.
+
+\subsection{Métricas utilizadas}
+
+La página consulta tres tipos principales de información.
+
+\subsubsection{Disponibilidad de dispositivos}
+
+La disponibilidad de los dispositivos se obtiene de las gráficas generadas por
+el colector de ping de Netdata. Se utiliza el porcentaje de pérdida de paquetes
+para clasificar cada equipo como disponible o no disponible.
+
+Los identificadores siguen la siguiente estructura:
+
+\begin{lstlisting}[style=terminal]
+ping_dispositivos_huawei.host_packet_loss_AR651-A
+ping_dispositivos_huawei.host_packet_loss_S6730H-C
+ping_dispositivos_huawei.host_packet_loss_S6730H-D
+ping_dispositivos_huawei.host_packet_loss_AR651-B
+\end{lstlisting}
+
+Si la pérdida de paquetes alcanza el 100\%, el dispositivo se muestra en color
+rojo, pero no se elimina del diagrama.
+
+\subsubsection{Estado de OSPF y MPLS LDP}
+
+Los estados permanentes de los enlaces se obtienen de las métricas creadas
+previamente mediante el colector \texttt{charts.d}.
+
+Para OSPF se utilizan:
+
+\begin{lstlisting}[style=terminal]
+huawei_routing.ospf_a_c
+huawei_routing.ospf_c_d
+huawei_routing.ospf_d_b
+\end{lstlisting}
+
+Para MPLS LDP se utilizan:
+
+\begin{lstlisting}[style=terminal]
+huawei_routing.ldp_a_c
+huawei_routing.ldp_c_d
+huawei_routing.ldp_d_b
+\end{lstlisting}
+
+Cada gráfica contiene la dimensión:
+
+\begin{lstlisting}[style=terminal]
+available
+\end{lstlisting}
+
+La interpretación es la siguiente:
+
+\begin{itemize}
+    \item \texttt{available = 1}: ambos extremos reportan el estado correcto.
+    \item \texttt{available = 0}: la fila SNMP desapareció, el estado cambió o
+    alguno de los extremos dejó de responder.
+\end{itemize}
+
+Para OSPF, el estado correcto corresponde a \texttt{Full}. Para MPLS LDP,
+corresponde a \texttt{Operational}.
+
+\subsubsection{Tráfico de los enlaces}
+
+El tráfico se obtiene de las gráficas SNMP de cada interfaz. Cada gráfica
+contiene las dimensiones \texttt{in} y \texttt{out}.
+
+Por ejemplo, para el enlace entre AR651-A y S6730H-C se consultan:
+
+\begin{lstlisting}[style=terminal]
+snmp_AR651-A.snmp_device_prof_ifTraffic_GigabitEthernet0/0/1
+
+snmp_S6730H-C.snmp_device_prof_ifTraffic_GigabitEthernet0/0/1
+\end{lstlisting}
+
+Las demás interfaces utilizan el mismo contexto:
+
+\begin{lstlisting}[style=terminal]
+snmp.device_prof_ifTraffic
+\end{lstlisting}
+
+Al colocar el cursor sobre un enlace, la página muestra:
+
+\begin{itemize}
+    \item Estado de la adyacencia OSPF.
+    \item Estado de la sesión MPLS LDP.
+    \item Nombre de la interfaz en ambos extremos.
+    \item Tráfico entrante en cada extremo.
+    \item Tráfico saliente en cada extremo.
+    \item Valores expresados en Mbit/s.
+\end{itemize}
+
+\subsection{Funcionamiento del servidor Python}
+
+El archivo \texttt{server.py} utiliza únicamente módulos incluidos en Python,
+por lo que no fue necesario instalar bibliotecas externas.
+
+El servidor escucha conexiones en todas las interfaces de la Raspberry Pi,
+utilizando el puerto 8080:
+
+\begin{lstlisting}[language=Python]
+server = ThreadingHTTPServer(("0.0.0.0", 8080), Handler)
+\end{lstlisting}
+
+Las solicitudes cuyo destino comienza con \texttt{/netdata/} son reenviadas
+hacia la API local de Netdata:
+
+\begin{lstlisting}[language=Python]
+NETDATA = "http://127.0.0.1:19999"
+target = NETDATA + self.path[len("/netdata"):]
+\end{lstlisting}
+
+Este mecanismo funciona como un proxy local y evita problemas de seguridad del
+navegador relacionados con solicitudes entre diferentes orígenes.
+
+\subsection{Actualización automática de la página}
+
+El archivo \texttt{index.html} contiene código JavaScript que consulta
+periódicamente el servidor Python. La actualización se ejecuta cada 15
+segundos:
+
+\begin{lstlisting}
+refresh();
+setInterval(refresh, 15000);
+\end{lstlisting}
+
+En cada actualización se realizan las siguientes operaciones:
+
+\begin{enumerate}
+    \item Se consulta el porcentaje de pérdida de paquetes de cada dispositivo.
+    \item Se consulta el estado OSPF de los tres enlaces.
+    \item Se consulta el estado MPLS LDP de los tres enlaces.
+    \item Se consulta el tráfico entrante y saliente de las interfaces.
+    \item Se actualizan los colores y textos de la topología.
+    \item Se actualiza el contenido mostrado al colocar el cursor sobre un
+    enlace.
+\end{enumerate}
+
+\subsection{Instalación de la aplicación}
+
+El archivo comprimido se copió hacia la Raspberry Pi mediante SCP:
+
+\begin{lstlisting}[style=terminal]
+scp netdata-topology.tar.gz \
+telecom@10.166.114.156:/tmp/
+\end{lstlisting}
+
+Posteriormente, se extrajo el contenido dentro del directorio
+\texttt{/opt}:
+
+\begin{lstlisting}[style=terminal]
+sudo tar -xzf \
+/tmp/netdata-topology.tar.gz \
+-C /opt
+\end{lstlisting}
+
+El resultado fue el directorio:
+
+\begin{lstlisting}[style=terminal]
+/opt/netdata-topology
+\end{lstlisting}
+
+Se asignó el propietario \texttt{root} y el grupo \texttt{netdata}:
+
+\begin{lstlisting}[style=terminal]
+sudo chown -R root:netdata \
+/opt/netdata-topology
+\end{lstlisting}
+
+También se establecieron permisos restrictivos para el directorio y sus
+archivos:
+
+\begin{lstlisting}[style=terminal]
+sudo chmod 750 \
+/opt/netdata-topology
+
+sudo chmod 640 \
+/opt/netdata-topology/index.html
+
+sudo chmod 750 \
+/opt/netdata-topology/server.py
+\end{lstlisting}
+
+\subsection{Creación del servicio de systemd}
+
+Para iniciar automáticamente la página junto con el sistema operativo se
+instaló el archivo de servicio:
+
+\begin{lstlisting}[style=terminal]
+sudo cp \
+/opt/netdata-topology/netdata-topology.service \
+/etc/systemd/system/
+\end{lstlisting}
+
+El servicio contiene la siguiente configuración principal:
+
+\begin{lstlisting}[style=terminal]
+[Unit]
+Description=Topologia personalizada basada en Netdata
+After=network-online.target netdata.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=netdata
+Group=netdata
+WorkingDirectory=/opt/netdata-topology
+ExecStart=/usr/bin/python3 /opt/netdata-topology/server.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+\end{lstlisting}
+
+Se recargó la configuración de systemd:
+
+\begin{lstlisting}[style=terminal]
+sudo systemctl daemon-reload
+\end{lstlisting}
+
+Finalmente, se habilitó e inició el servicio:
+
+\begin{lstlisting}[style=terminal]
+sudo systemctl enable --now netdata-topology
+\end{lstlisting}
+
+El estado del servicio se verificó con:
+
+\begin{lstlisting}[style=terminal]
+sudo systemctl status \
+netdata-topology \
+--no-pager
+\end{lstlisting}
+
+También se verificó localmente la respuesta del servidor:
+
+\begin{lstlisting}[style=terminal]
+curl -I http://127.0.0.1:8080
+\end{lstlisting}
+
+\subsection{Acceso a la topología}
+
+La topología se encuentra disponible desde un navegador web mediante la
+dirección IP de la Raspberry Pi y el puerto 8080:
+
+\begin{lstlisting}[style=terminal]
+http://10.166.114.156:8080
+\end{lstlisting}
+
+La página se actualiza automáticamente, por lo que no es necesario recargar
+manualmente el navegador después de apagar o restaurar un dispositivo o
+enlace.
+
+\subsection{Consideraciones de seguridad}
+
+El servidor personalizado no incorpora autenticación propia. Por esta razón,
+el puerto 8080 debe estar disponible únicamente desde la red administrativa y
+no debe publicarse directamente hacia Internet.
 
 
 \section{Habilitación del monitoreo de OSPF y MPLS mediante SNMP}
