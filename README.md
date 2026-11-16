@@ -1,120 +1,120 @@
-# Gestor de monitoreo de red con Netdata y MPLS Huawei
+# Network Monitoring System with Netdata and Huawei MPLS
 
-Proyecto de implementación de un sistema de monitoreo centralizado con **Netdata en una Raspberry Pi**, integrado con una red MPLS formada por equipos Huawei AR651 y S6730H.
+A project to implement a centralized monitoring system using **Netdata on a Raspberry Pi**, integrated with an MPLS network built with Huawei AR651 and S6730H devices.
 
-El repositorio reúne los manuales de implementación, las evidencias gráficas, una topología de eNSP y un proyecto Python para la configuración de equipos por consola serie. El laboratorio aborda conectividad IP con OSPF, LSP estáticos, distribución dinámica de etiquetas con LDP y supervisión mediante SNMPv3.
+This repository brings together implementation guides, screenshots, an eNSP topology, and a Python project for configuring devices through a serial console. The lab covers IP connectivity with OSPF, static LSPs, dynamic label distribution with LDP, and monitoring through SNMPv3.
 
-## Objetivos
+## Objectives
 
-- Desplegar Netdata en una Raspberry Pi y comprobar la recolección de métricas.
-- Integrar los dispositivos Huawei al monitoreo mediante SNMPv3.
-- Configurar y verificar una red MPLS sobre una base de enrutamiento OSPF.
-- Comparar LSP estáticos y dinámicos, incluyendo los modos de anuncio DU y DoD.
-- Generar tráfico TCP y UDP con iPerf3 y observar su comportamiento en Netdata.
-- Organizar la visualización mediante dashboards, alertas y topologías de red.
+- Deploy Netdata on a Raspberry Pi and verify metric collection.
+- Integrate Huawei devices into the monitoring system through SNMPv3.
+- Configure and verify an MPLS network over an OSPF routing infrastructure.
+- Compare static and dynamic LSPs, including DU and DoD label advertisement modes.
+- Generate TCP and UDP traffic with iPerf3 and observe its behavior in Netdata.
+- Organize monitoring views through dashboards, alerts, and network topologies.
 
-## Fases del proyecto
+## Project Phases
 
-| Fase | Alcance | Documentación |
+| Phase | Scope | Documentation |
 | --- | --- | --- |
-| **Fase 1: implementación del gestor** | Preparación de la Raspberry Pi, instalación de Ubuntu Server y Netdata, pruebas de puesta en marcha e integración con Netdata Cloud. Incluye usuarios, roles, Rooms y dashboards. | [Manual de implementación](Fase_1/main.pdf) |
-| **Fase 2: monitoreo y gestión de MPLS** | Integración SNMPv3, configuración OSPF y MPLS, transición de LSP estáticos a LDP, pruebas iPerf3, dashboards, alertas y monitoreo de adyacencias y sesiones. | [Guía de monitoreo y gestión de la red](Fase_2/main.pdf) |
+| **Phase 1: Monitoring System Deployment** | Raspberry Pi preparation, Ubuntu Server and Netdata installation, initial operational checks, and Netdata Cloud integration. Includes users, roles, Rooms, and dashboards. | [Implementation Guide](Fase_1/main.pdf) |
+| **Phase 2: MPLS Monitoring and Management** | SNMPv3 integration, OSPF and MPLS configuration, transition from static LSPs to LDP, iPerf3 testing, dashboards, alerts, and adjacency and session monitoring. | [Network Monitoring and Management Guide](Fase_2/main.pdf) |
 
-## Contenido del repositorio
+## Repository Contents
 
-| Ruta | Contenido |
+| Path | Contents |
 | --- | --- |
-| [`eNSP/Topologia/`](eNSP/Topologia/) | Proyecto de simulación: `Topologia.topo` y los directorios de dispositivos con sus archivos `flash.efz`. |
-| [`Fase_1/`](Fase_1/) | Informe de la primera fase y evidencias en `Pictures/`. Incluye fragmentos de documentación en formato `.tex`. |
-| [`Fase_2/`](Fase_2/) | Informe de la segunda fase y capturas de configuración, monitoreo y pruebas de tráfico. |
-| [`huawei_serial/`](huawei_serial/) | Proyecto Python para trabajar con la consola serie de los equipos. Consultar su [README específico](huawei_serial/README.md). |
-| [`huawei_serial/configs/`](huawei_serial/configs/) | Configuraciones y comandos de verificación organizados por equipo y etapa. |
-| [`huawei_serial/src/code_python/`](huawei_serial/src/code_python/) | Código fuente de la herramienta, incluido `serial_config.py` y el punto de entrada `__main__.py`. |
-| [`huawei_serial/tests/`](huawei_serial/tests/) | Pruebas de la herramienta serie en `test_serial_config.py`. |
-| [`huawei_serial/referencia/`](huawei_serial/referencia/) | Guion de referencia `MPLS_Lab_Huawei_Script_Completo.txt`. |
+| [`eNSP/Topologia/`](eNSP/Topologia/) | Simulation project: `Topologia.topo` and device directories containing their `flash.efz` files. |
+| [`Fase_1/`](Fase_1/) | Phase 1 report and screenshots in `Pictures/`. Includes documentation fragments in `.tex` format. |
+| [`Fase_2/`](Fase_2/) | Phase 2 report and screenshots of configuration, monitoring, and traffic tests. |
+| [`huawei_serial/`](huawei_serial/) | Python project for working with device serial consoles. See its [dedicated README](huawei_serial/README.md). |
+| [`huawei_serial/configs/`](huawei_serial/configs/) | Configurations and verification commands organized by device and stage. |
+| [`huawei_serial/src/code_python/`](huawei_serial/src/code_python/) | Tool source code, including `serial_config.py` and the `__main__.py` entry point. |
+| [`huawei_serial/tests/`](huawei_serial/tests/) | Serial tool tests in `test_serial_config.py`. |
+| [`huawei_serial/referencia/`](huawei_serial/referencia/) | Reference script: `MPLS_Lab_Huawei_Script_Completo.txt`. |
 
-El proyecto Python incluye `pyproject.toml` y `uv.lock` para definir el paquete y sus dependencias. Los parámetros de ejecución y de conexión serie se consultan en su documentación interna.
+The Python project includes `pyproject.toml` and `uv.lock` to define the package and its dependencies. Refer to its internal documentation for execution and serial connection parameters.
 
-## Entorno del laboratorio
+## Lab Environment
 
-| Componente | Configuración documentada |
+| Component | Documented Configuration |
 | --- | --- |
-| Servidor de monitoreo | Raspberry Pi 5 con 8 GB de RAM y SSD externo de 120 GB. |
-| Sistema operativo | Ubuntu Server de 64 bits para ARM64. |
-| Plataforma de monitoreo | Netdata Agent y Netdata Cloud para la administración compartida. |
-| Equipos de borde | Dos routers Huawei AR651: `AR651-A` y `AR651-B`. |
-| Equipos de tránsito | Dos switches Huawei S6730H: `S6730H-C` y `S6730H-D`. |
-| Estaciones de prueba | Dos computadoras con iPerf3, conectadas a los extremos de la red. |
-| Herramientas de apoyo | Cliente SSH, herramientas SNMP, consola serie y eNSP para abrir la topología de simulación. |
+| Monitoring server | Raspberry Pi 5 with 8 GB of RAM and a 120 GB external SSD. |
+| Operating system | 64-bit Ubuntu Server for ARM64. |
+| Monitoring platform | Netdata Agent and Netdata Cloud for shared administration. |
+| Edge devices | Two Huawei AR651 routers: `AR651-A` and `AR651-B`. |
+| Transit devices | Two Huawei S6730H switches: `S6730H-C` and `S6730H-D`. |
+| Test workstations | Two computers running iPerf3, connected at opposite ends of the network. |
+| Supporting tools | SSH client, SNMP tools, serial console, and eNSP to open the simulation topology. |
 
-La instalación del gestor requiere acceso administrativo al sistema e Internet para descargar los paquetes. Los requisitos de Python y las dependencias de la herramienta serie se definen en [`huawei_serial/pyproject.toml`](huawei_serial/pyproject.toml).
+Installing the monitoring system requires administrative access to the operating system and an Internet connection to download packages. Python requirements and serial tool dependencies are defined in [`huawei_serial/pyproject.toml`](huawei_serial/pyproject.toml).
 
-## Topología y direccionamiento
+## Topology and Addressing
 
-El núcleo tiene tres enlaces consecutivos: **AR651-A con S6730H-C**, **S6730H-C con S6730H-D** y **S6730H-D con AR651-B**. Los routers actúan como equipos de borde y los switches como equipos de tránsito MPLS.
+The core consists of three consecutive links: **AR651-A to S6730H-C**, **S6730H-C to S6730H-D**, and **S6730H-D to AR651-B**. The routers act as edge devices, while the switches act as MPLS transit devices.
 
 ### Loopbacks
 
-| Equipo | Loopback0 | Función |
+| Device | Loopback0 | Role |
 | --- | --- | --- |
-| AR651-A | `1.1.1.1/32` | Borde de la red MPLS. |
-| S6730H-C | `2.2.2.2/32` | Tránsito MPLS. |
-| S6730H-D | `3.3.3.3/32` | Tránsito MPLS. |
-| AR651-B | `4.4.4.4/32` | Borde de la red MPLS. |
+| AR651-A | `1.1.1.1/32` | MPLS network edge. |
+| S6730H-C | `2.2.2.2/32` | MPLS transit. |
+| S6730H-D | `3.3.3.3/32` | MPLS transit. |
+| AR651-B | `4.4.4.4/32` | MPLS network edge. |
 
-### Enlaces del núcleo
+### Core Links
 
-| Enlace | Subred | Direcciones de los extremos |
+| Link | Subnet | Endpoint Addresses |
 | --- | --- | --- |
 | AR651-A / S6730H-C | `10.0.12.0/30` | A: `10.0.12.1`; C: `10.0.12.2`. |
 | S6730H-C / S6730H-D | `10.0.23.0/30` | C: `10.0.23.1`; D: `10.0.23.2`. |
 | S6730H-D / AR651-B | `10.0.34.0/30` | D: `10.0.34.1`; B: `10.0.34.2`. |
 
-### Monitoreo y estaciones de prueba
+### Monitoring and Test Workstations
 
-| Elemento | Dirección | Acceso o puerta de enlace |
+| Item | Address | Access or Gateway |
 | --- | --- | --- |
-| Raspberry Pi, interfaz de monitoreo | `192.168.10.1/24` | Rutas hacia las loopbacks mediante `192.168.10.2`. |
-| AR651-A, interfaz hacia el gestor | `192.168.10.2/24` | Red de monitoreo anunciada en OSPF. |
-| Computadora cliente iPerf3 | `10.10.10.1/30` | `10.10.10.2`, interfaz de acceso de AR651-A. |
-| Computadora servidora iPerf3 | `20.20.20.1/30` | `20.20.20.2`, interfaz de acceso de AR651-B. |
+| Raspberry Pi monitoring interface | `192.168.10.1/24` | Routes to the loopbacks through `192.168.10.2`. |
+| AR651-A interface connected to the monitoring server | `192.168.10.2/24` | Monitoring network advertised through OSPF. |
+| iPerf3 client computer | `10.10.10.1/30` | `10.10.10.2`, the AR651-A access interface. |
+| iPerf3 server computer | `20.20.20.1/30` | `20.20.20.2`, the AR651-B access interface. |
 
-Las direcciones corresponden al montaje descrito en la Fase 2. Comprobar los nombres reales de las interfaces antes de aplicar las configuraciones, especialmente al adaptar el laboratorio a eNSP u otros equipos.
+These addresses correspond to the setup described in Phase 2. Check the actual interface names before applying configurations, especially when adapting the lab to eNSP or other devices.
 
-## Puesta en marcha
+## Getting Started
 
-1. **Preparar el gestor.** Seguir el [manual de la Fase 1](Fase_1/main.pdf) para instalar el sistema operativo, habilitar el acceso remoto y desplegar Netdata.
-2. **Verificar Netdata.** Comprobar el servicio, la interfaz web y la disponibilidad de métricas. El panel local se consulta en `http://IP_DE_LA_RASPBERRY:19999`.
-3. **Preparar la red Huawei.** Identificar las interfaces y aplicar la configuración base de cada equipo. Verificar OSPF y la conectividad entre loopbacks antes de continuar con MPLS.
-4. **Configurar MPLS por etapas.** Construir el LSP estático, comprobarlo y realizar la transición a LDP según la [guía de la Fase 2](Fase_2/main.pdf).
-5. **Integrar el monitoreo.** Configurar SNMPv3 en los equipos y los trabajos de recolección en `/etc/netdata/go.d/snmp.conf`. Asegurar conectividad de ida y vuelta entre la Raspberry Pi y los dispositivos.
-6. **Habilitar las redes de prueba.** Configurar las estaciones, anunciar sus subredes y verificar que existan LSP para las redes de acceso.
-7. **Ejecutar las pruebas.** Generar tráfico con iPerf3 y revisar interfaces, caudal, estados OSPF/LDP y alertas en Netdata.
+1. **Prepare the monitoring server.** Follow the [Phase 1 guide](Fase_1/main.pdf) to install the operating system, enable remote access, and deploy Netdata.
+2. **Verify Netdata.** Check the service, web interface, and metric availability. Access the local dashboard at `http://RASPBERRY_PI_IP:19999`.
+3. **Prepare the Huawei network.** Identify the interfaces and apply the base configuration to each device. Verify OSPF and connectivity between loopbacks before proceeding with MPLS.
+4. **Configure MPLS in stages.** Set up and verify the static LSP, then transition to LDP as described in the [Phase 2 guide](Fase_2/main.pdf).
+5. **Integrate monitoring.** Configure SNMPv3 on the devices and collection jobs in `/etc/netdata/go.d/snmp.conf`. Ensure bidirectional connectivity between the Raspberry Pi and the devices.
+6. **Enable the test networks.** Configure the workstations, advertise their subnets, and verify that LSPs exist for the access networks.
+7. **Run the tests.** Generate traffic with iPerf3 and review interfaces, throughput, OSPF/LDP states, and alerts in Netdata.
 
-Para utilizar la consola serie, seguir las instrucciones de [`huawei_serial/README.md`](huawei_serial/README.md) y seleccionar los archivos correspondientes al equipo conectado.
+To use the serial console, follow the instructions in [`huawei_serial/README.md`](huawei_serial/README.md) and select the files for the connected device.
 
-### Orden de las configuraciones
+### Configuration Order
 
-Los archivos se encuentran en `huawei_serial/configs/<EQUIPO>/`, donde `<EQUIPO>` es `AR651-A`, `AR651-B`, `S6730H-C` o `S6730H-D`.
+Files are located in `huawei_serial/configs/<DEVICE>/`, where `<DEVICE>` is `AR651-A`, `AR651-B`, `S6730H-C`, or `S6730H-D`.
 
-| Orden | Archivo | Propósito |
+| Order | File | Purpose |
 | --- | --- | --- |
-| 1 | `01_base_ospf.cfg` | Configuración base y enrutamiento OSPF. |
-| 2 | `01_verificar_ospf.cfg` | Verificación de vecinos, rutas y conectividad IP. |
-| 3 | `02_lsp_estatico.cfg` | Configuración del LSP estático. |
-| 4 | `02_verificar_lsp.cfg` | Verificación de MPLS y del LSP estático. |
-| 5 | `03_cambiar_a_ldp.cfg` | Transición del escenario estático a LDP. |
-| 6 | `03_verificar_ldp.cfg` | Verificación de vecinos, sesiones y LSP dinámicos. |
-| 7, opcional | `04_dod_opcional.cfg` | Prueba del modo Downstream on Demand, disponible en C y D. |
-| 8 | `05_restaurar_du.cfg` | Restauración de Downstream Unsolicited después de la prueba, disponible en C y D. |
+| 1 | `01_base_ospf.cfg` | Base configuration and OSPF routing. |
+| 2 | `01_verificar_ospf.cfg` | Neighbor, route, and IP connectivity verification. |
+| 3 | `02_lsp_estatico.cfg` | Static LSP configuration. |
+| 4 | `02_verificar_lsp.cfg` | MPLS and static LSP verification. |
+| 5 | `03_cambiar_a_ldp.cfg` | Transition from the static scenario to LDP. |
+| 6 | `03_verificar_ldp.cfg` | Neighbor, session, and dynamic LSP verification. |
+| 7, optional | `04_dod_opcional.cfg` | Downstream on Demand mode test, available on C and D. |
+| 8 | `05_restaurar_du.cfg` | Restore Downstream Unsolicited after the test, available on C and D. |
 
-Revisar cada archivo antes de aplicarlo y completar la misma etapa en los equipos implicados antes de avanzar. Las configuraciones SNMP, los perfiles de Netdata y las redes de acceso se desarrollan en el informe de la Fase 2; consultar ese manual para completar el montaje.
+Review each file before applying it, and complete the same stage on all involved devices before proceeding. SNMP configurations, Netdata profiles, and access networks are covered in the Phase 2 report; consult that guide to complete the setup.
 
-## Verificación
+## Verification
 
-### Gestor de monitoreo
+### Monitoring Server
 
-Ejecutar en la Raspberry Pi:
+Run the following commands on the Raspberry Pi:
 
 ```bash
 sudo systemctl is-enabled netdata
@@ -123,11 +123,11 @@ curl -fsS http://127.0.0.1:19999/api/v1/info
 sudo journalctl -u netdata -b --priority=err --no-pager
 ```
 
-El servicio debe estar habilitado y activo, la API debe responder con información del nodo y el registro debe permitir descartar errores que impidan la recolección.
+The service should be enabled and active, the API should return node information, and the log should be checked for errors that could prevent metric collection.
 
-### OSPF y MPLS
+### OSPF and MPLS
 
-Ejecutar en la consola de los equipos Huawei, según la etapa:
+Run the following commands in the Huawei device console, as appropriate for the current stage:
 
 ```text
 display ospf peer brief
@@ -140,42 +140,42 @@ display mpls ldp lsp
 display mpls lsp
 ```
 
-En la etapa dinámica, las adyacencias OSPF deben estar en **Full** y las sesiones LDP en **Operational**. Para las pruebas entre computadoras, verificar también las FEC `10.10.10.0/30` y `20.20.20.0/30`, con etiquetas de salida en los equipos de ingreso correspondientes.
+In the dynamic stage, OSPF adjacencies should be **Full** and LDP sessions should be **Operational**. For tests between computers, also verify the `10.10.10.0/30` and `20.20.20.0/30` FECs, including outgoing labels on the corresponding ingress devices.
 
-### Tráfico con iPerf3
+### iPerf3 Traffic
 
-En la computadora servidora, con dirección `20.20.20.1`:
+On the server computer at `20.20.20.1`:
 
 ```bash
 iperf3 -s
 ```
 
-En la computadora cliente, con dirección `10.10.10.1`:
+On the client computer at `10.10.10.1`:
 
 ```bash
-# TCP durante 120 segundos
+# TCP for 120 seconds
 iperf3 -c 20.20.20.1 -t 120 -i 1
 
-# TCP en sentido inverso
+# TCP in the reverse direction
 iperf3 -c 20.20.20.1 -t 120 -i 1 -R
 
-# UDP a 500 Mbit/s durante 120 segundos
+# UDP at 500 Mbit/s for 120 seconds
 iperf3 -c 20.20.20.1 -u -b 500M -t 120 -i 1
 ```
 
-Permitir las conexiones necesarias en el firewall de las estaciones. En UDP, registrar el caudal recibido, el jitter y la pérdida de datagramas; en Netdata, comprobar que las interfaces del recorrido reflejen el tráfico generado.
+Allow the required connections through the workstation firewalls. For UDP, record the received throughput, jitter, and datagram loss; in Netdata, verify that interfaces along the path reflect the generated traffic.
 
-## Consideraciones del laboratorio
+## Lab Considerations
 
-- **Conectividad y etiquetado:** comprobar las FEC de las redes de acceso; una respuesta a ping y una sesión LDP activa, por sí solas, no demuestran que el tráfico de las computadoras viaje etiquetado.
-- **Pruebas de falla:** la topología es lineal y carece de una ruta alternativa. Restaurar los enlaces intervenidos antes de continuar con las verificaciones.
-- **Monitoreo de OSPF:** el informe documenta la vinculación del proceso mediante `ospf mib-binding 1` para exponer sus estados por SNMP en los equipos utilizados.
-- **Credenciales:** configurar SNMPv3 con autenticación, cifrado y acceso de lectura. Sustituir las credenciales de ejemplo de los manuales y mantener los tokens fuera del repositorio.
-- **Topología personalizada:** la Fase 2 describe una aplicación web adicional en el puerto `8080`. Sus archivos se documentan en el PDF y no aparecen en la estructura de este repositorio; su despliegue se realiza por separado siguiendo esa guía.
+- **Connectivity and labeling:** verify the FECs for the access networks; a ping response and an active LDP session alone do not prove that traffic between the computers is being label-switched.
+- **Failure testing:** the topology is linear and has no alternate path. Restore any links affected by testing before continuing with verification.
+- **OSPF monitoring:** the report documents the use of `ospf mib-binding 1` to bind the OSPF process to the MIB and expose its states through SNMP on the devices used.
+- **Credentials:** configure SNMPv3 with authentication, encryption, and read-only access. Replace the example credentials in the guides and keep tokens out of the repository.
+- **Custom topology:** Phase 2 describes an additional web application on port `8080`. Its files are documented in the PDF and are not included in this repository's structure; deploy it separately by following that guide.
 
-## Autores
+## Authors
 
-| Integrante | Carné |
+| Team Member | Student ID |
 | --- | --- |
 | Alan Samuel Gomez Paz | 22115 |
 | Samuel David Tórtola Bardales | 22094 |
